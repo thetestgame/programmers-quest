@@ -1,7 +1,5 @@
-<img src="https://avatars3.githubusercontent.com/u/22061741?s=200&v=4" align="right" width="200">
-
 Programmer's Quest
-=======
+==================
 
 ### Dependencies
 
