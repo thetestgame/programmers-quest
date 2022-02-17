@@ -1,0 +1,23 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name":"Quest UberDOG (Dev)",
+            "type":"python",
+            "request":"launch",
+            "module":"quest.uberdog"
+        },
+        {
+            "name":"Quest AI (Dev)",
+            "type":"python",
+            "request":"launch",
+            "module":"quest.ai"
+        },
+        {
+            "name":"Quest Client (Dev)",
+            "type":"python",
+            "request":"launch",
+            "module":"quest.client"
+        }
+    ]
+}

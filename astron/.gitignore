@@ -1,0 +1,8 @@
+# Log files
+*.logs
+
+# Built Astron server instances
+*.dll
+*.lib
+astrond
+astrond.exe

@@ -1,0 +1,17 @@
+# Python pypi packages used by the Programmer's Quest MMO Panda3D application
+# Panda3d must always be included in this file as a requirement to
+# run the build_apps commands for distribution
+
+# Panda3D
+panda3d
+panda3d-stageflow
+
+# Logging
+sentry_sdk
+
+# Native UI
+easygui
+
+# Misc.
+six
+numpy

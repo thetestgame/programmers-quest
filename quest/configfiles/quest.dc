@@ -1,0 +1,14 @@
+// Some abstractions for readability.
+typedef uint32 doId;
+typedef uint32 zoneId;
+typedef uint64 channel;
+
+// The Python Views for these distributed classes.
+from quest.distributed.authentication import LoginManager/AI/UD
+
+// A simple DOG for username/password authentication and handoff to
+// the DistributedMaproot for avatar creation.
+dclass LoginManager {
+  set_maproot(doId maproot);
+  login(string username, string password) clsend;
+};
