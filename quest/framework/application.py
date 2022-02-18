@@ -1,10 +1,14 @@
+from threading import local
 from quest.engine import core, prc, showbase
 from quest.engine import runtime, vfs, logging
 from quest.engine import http
+from quest.framework import localizer
 
 import os
 import ctypes
 import easygui
+import sys
+from collections import defaultdict
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -24,6 +28,7 @@ class QuestApplication(core.QuestObject):
 
         runtime.dev = self._development
         runtime.headless = self._headless
+        runtime.application = self
 
     @property
     def base(self) -> showbase.QuestShowBase:
@@ -77,6 +82,7 @@ class QuestApplication(core.QuestObject):
 
         # Instantiate our engine singletons
         http.HttpManager.instantiate_singleton()
+        localizer.ApplicationLocalizer.instantiate_singleton()
 
     def setup_development(self) -> None:
         """
@@ -167,6 +173,33 @@ class QuestApplication(core.QuestObject):
             self.handle_exception(e)
 
         return self.exit_code
+
+    def get_command_line_arguments(self) -> dict:
+        """
+        Retrieves the passed command line arguments as a dictionary. The arguments must
+        follow the format of --key=value to be accepted
+        """
+
+        d = defaultdict(list)
+        for k, v in ((k.lstrip('-'), v) for k,v in (a.split('=') for a in sys.argv[1:])):
+            d[k].append(v)
+
+        return d
+
+    def get_startup_variable(self, key: str, default: str) -> str:
+        """
+        Retrieves the startup variable passed either via command line or via
+        the host environment variables
+        """
+
+        cmd_args = self.get_command_line_arguments()
+        
+        # Prefer environment variables first to allow for Docker input
+        return_value = cmd_args.get(key, default)
+        if os.environ.get(key) is not None:
+            return_value = os.environ.get(key)
+
+        return return_value
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
