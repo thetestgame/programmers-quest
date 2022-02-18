@@ -9,6 +9,9 @@ panda3d-blend2bam
 panda3d-astron
 panda3d-sprite
 
+# Azure
+playfab
+
 # Logging
 sentry_sdk
 

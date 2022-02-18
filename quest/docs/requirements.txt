@@ -8,6 +8,9 @@ panda3d-stageflow
 panda3d-astron
 panda3d-sprite
 
+# Azure
+playfab
+
 # Logging
 sentry_sdk
 

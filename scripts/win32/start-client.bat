@@ -2,12 +2,14 @@
 title PQ - Client
 
 set CA_HOST=127.0.0.1
-set /P PQ_PLAYTOKEN=Username: 
+set /P PQ_EMAIL=Email: 
+set /P PQ_PASSWORD=Password: 
 echo.
 
 echo ===============================
 echo Starting Programmer's Quest...
-echo Username: %PQ_PLAYTOKEN%
+echo Email: %PQ_EMAIL%
+echo Password: Secret
 echo Gameserver: %CA_HOST%
 echo ===============================
 

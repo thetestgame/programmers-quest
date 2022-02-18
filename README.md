@@ -5,13 +5,7 @@ Programmer's Quest!
 
 Programmer's Quest! The open source Python 3 2D MMORPG showcasing the power of Panda3D, Distributed Objects, and the Astron server built by a industry professional. This project is still a work in progress.
 
-### Dependencies
-
-* panda3d
-* panda3d-blend2bam (development)
-* sentry_sdk
-* easygui
-* gitpython (development)
+This project depends on external Azure resources to function properly. To contribute to this repository make sure you have a valid Azure and PlayFab account to make the required resources. To keep this open to everyone a development environment should all be able to run under the free tier of their respective services.
 
 ## Preparing an Environment
 
@@ -31,10 +25,11 @@ python -m quest.client
 ```
 
 This will boot the game with paths defined for the source directory as well as provide useful developer hotkeys.
-| Hotkey |           Description           |
-|--------|---------------------------------|
-|   F1   | Toggles The ShowBase OOBE mode  |
-|   F2   | Reloads the applications source |
+| Hotkey |               Description               |
+|--------|-----------------------------------------|
+|   F1   | Toggles The ShowBase OOBE mode          |
+|   F2   | Reloads the applications source         |
+|   F3   | Runs the Panda ls function on the scene |
 
 ## Project Commands
 
