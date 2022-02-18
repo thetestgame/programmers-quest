@@ -9,6 +9,7 @@ from quest.engine import prc, runtime
 from direct.distributed import MsgTypes
 from direct.distributed.PyDatagram import PyDatagram
 
+from playfab import PlayFabServerAPI
 import traceback
 import sys
 
@@ -239,5 +240,28 @@ class QuestInternalRepository(astron.AstronInternalRepository, QuestNetworkRepos
         """
 
         self.writeServerEvent(*args, **kwargs)
+
+    def writeServerEvent(self, logtype: str, *args, **kwargs) -> None:
+        """
+        Custom override of the Astron writeServerEvent to pipe server events to the Azure PlayFab PlayStream system as well as
+        the internal Astron EventLogger server instance
+        """
+
+        # Write to Astron's internal event logger
+        super().writeServerEvent(logtype, *args, **kwargs)
+
+        # Write to PlayFab's event stream
+        logtype = logtype.replace('-', '_')
+        request = {
+            'EventName': logtype,
+            'Body': kwargs
+        }
+
+        PlayFabServerAPI.WriteTitleEvent(request, self._handle_write_title_event_callback)
+
+    def _handle_write_title_event_callback(self, results: dict, error: dict) -> None:
+        """
+        Handles the results from the WriteTitleEvent api request
+        """
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------- #
