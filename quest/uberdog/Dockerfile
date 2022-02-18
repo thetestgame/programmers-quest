@@ -5,7 +5,7 @@ COPY . /server/
 WORKDIR /server
 
 # Install our pip dependencies
-RUN pip install -r requirements.txt
+RUN pip install -r quest/docs/requirements.txt
 
 # Setup our entry point and command
 ENTRYPOINT ["python"]
