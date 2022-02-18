@@ -62,9 +62,8 @@ jobs:
   # Builds the Docker server images for Github Packages
   build-and-push-server-packages:
     name: Build Server Image (${{ matrix.name }})
-    if: github.event == 'push'
     runs-on: ubuntu-latest
-    needs: [perform-source-tests, build-client-executables]
+    needs: [build-client-executables]
     permissions:
       contents: read
       packages: write
