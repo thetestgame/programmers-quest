@@ -19,7 +19,7 @@ messagedirector:
 roles:
     - type: clientagent
       bind: 0.0.0.0:6667
-      version: "0.0.1"
+      version: "quest-dev"
       client:
         type: libastron
 

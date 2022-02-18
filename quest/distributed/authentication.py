@@ -21,14 +21,14 @@ class LoginManager(objects.QuestDistributedObjectGlobal):
     """
     """
 
-    def generateInit(self):
+    def generateInit(self) -> None:
         """
         """
 
         super().generateInit()
         self.notify.info(datetime.now().strftime("%H:%M:%S")+" LoginManager.generateInit() for "+str(self.doId))
 
-    def login(self, username, password):
+    def login(self, username: str, password: str) -> None:
         """
         """
 
@@ -42,14 +42,14 @@ class LoginManagerAI(objects.QuestDistributedObjectGlobalAI):
     """
     """
 
-    def generate(self):
+    def generate(self) -> None:
         """
         """
 
         super().generate()
         self.notify.info(datetime.now().strftime("%H:%M:%S")+" LoginManagerAI.generate() for "+str(self.doId))
 
-    def set_maproot(self, maproot_doId):
+    def set_maproot(self, maproot_doId: int) -> None:
         """
         """
 
@@ -62,14 +62,14 @@ class LoginManagerUD(objects.QuestDistributedObjectGlobalUD):
     """
     """
 
-    def generate(self):
+    def generate(self) -> None:
         """
         """
 
         super().generate()
         self.notify.info(datetime.now().strftime("%H:%M:%S")+" LoginManagerUD.generate() for "+str(self.doId))
 
-    def set_maproot(self, maproot_doId):
+    def set_maproot(self, maproot_doId: int) -> None:
         """
         Tells the LoginManagerUD what maproot to notify on login.
         """
@@ -78,24 +78,17 @@ class LoginManagerUD(objects.QuestDistributedObjectGlobalUD):
         #self.maproot = DistributedMaprootUD(self.air)
         #self.maproot.generateWithRequiredAndId(maproot_doId, 0, 1)
 
-    def login(self, username, password):
+    def login(self, username: str, password: str) -> None:
         """
         """
 
         clientId = self.air.get_msg_sender()
-        print(datetime.now().strftime("%H:%M:%S")+" LoginManagerUD.login("+username+", <password>)  in "+str(self.doId)+" for client "+str(clientId))
+        self.notify.info(datetime.now().strftime("%H:%M:%S")+" LoginManagerUD.login("+username+", <password>)  in "+str(self.doId)+" for client "+str(clientId))
         if (username == "guest") and (password == "guest"):
             # Authenticate a client
             # FIXME: "2" is the magic number for CLIENT_STATE_ESTABLISHED,
             # for which currently no mapping exists.
             self.air.setClientState(clientId, 2)
-
-            # The client is now authenticated; create an Avatar
-            #self.maproot.sendUpdate("createAvatar", # Field to call
-            #                        [clientId])     # Arguments
-            self.maproot.create_avatar(clientId)
-            
-            # log login
             self.notify.info("Login successful (user: %s)" % (username,))
 
         else:

@@ -6,6 +6,7 @@ from quest.framework import singleton, configurable
 from quest.framework import runnable
 from quest.world import tmx, entity, layer
 from quest.world import builder, sheet
+from quest.distributed import objects
 
 from dataclasses import dataclass
 import numpy as np
@@ -152,7 +153,7 @@ class GameWorld(configurable.Configurable, runnable.Runnable, core.QuestObject):
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-class WorldManager(configurable.Configurable, singleton.Singleton, core.QuestObject):
+class ConfigurableWorldCollection(configurable.Configurable, core.QuestObject):
     """
     """
 
@@ -199,5 +200,9 @@ class WorldManager(configurable.Configurable, singleton.Singleton, core.QuestObj
             return False
 
         return True
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#

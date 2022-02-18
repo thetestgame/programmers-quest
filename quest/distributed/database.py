@@ -1,4 +1,3 @@
-
 from panda3d.direct import DCPacker
 from direct.distributed.MsgTypes import *
 from direct.directnotify import DirectNotifyGlobal

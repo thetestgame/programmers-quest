@@ -3,7 +3,7 @@ from panda3d import core as p3d
 from quest.engine import core, prc, showbase
 from quest.engine import runtime, vfs
 from quest.framework import application, utilities
-from quest.client import flow, settings, camera
+from quest.client import flow, network, settings, camera
 from quest.world import world
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
@@ -44,10 +44,10 @@ class ClientApplication(application.QuestApplication):
         
         super().setup_game()
         
-        #playfab.PlayFabClientInterface.instantiate_singleton('config/playfabInterface.ini')
         flow.ClientFlowManager.instantiate_singleton('config/flowManager.ini')
         camera.CameraManager.instantiate_singleton('config/cameraManager.ini')
-        world.WorldManager.instantiate_singleton('config/worldManager.ini')
+        network.QuestClientNetworkManager.instantiate_singleton()
+        #world.WorldManager.instantiate_singleton('config/worldManager.ini')
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 

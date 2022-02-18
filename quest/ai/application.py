@@ -1,6 +1,7 @@
 from quest.engine import core, prc, showbase
 from quest.engine import runtime, vfs
 from quest.framework import application
+from quest.distributed import astron, constants
 
 import argparse
 
@@ -12,6 +13,30 @@ class QuestAIApplication(application.QuestApplication):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    def setup_game(self) -> None:
+        """
+        """
+
+        super().setup_game()
+        self.connect_to_astron()
+
+    def connect_to_astron(self) -> None:
+        """
+        Establishes our connection to the Astron MessageDirector
+        """
+
+        # Establish our repository connection
+        self.base.air = astron.AstronInternalRepository(
+            baseChannel=constants.NetworkChannels.AI_CHANNEL, # TODO: make configurable
+            serverId=constants.NetworkChannels.STATE_SERVER_CHANNEL,
+            dcFileNames=['config/quest.dc'],
+            connectMethod=astron.AstronInternalRepository.CM_NET)
+        self.base.air.connect("127.0.0.1", 7199)
+        self.districtId = self.base.air.GameGlobalsId = constants.NetworkChannels.AI_CHANNEL #TODO: make configurable
+
+        # Create our global object instances
+        self.login_manager = self.base.air.generateGlobalObject(constants.NetworkGlobalObjectIds.DOG_LOGIN_MANAGER, 'LoginManager')
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
