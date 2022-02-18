@@ -5,6 +5,8 @@
 # Panda3D
 panda3d
 panda3d-stageflow
+panda3d-astron
+panda3d-sprite
 
 # Logging
 sentry_sdk

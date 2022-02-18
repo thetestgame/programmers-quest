@@ -2,6 +2,7 @@ from quest.engine import core, prc, showbase
 from quest.engine import runtime, vfs
 from quest.client import splash
 from quest.framework import singleton, configurable
+from quest.distributed import repository
 
 from stageflow import Flow, prefab, Stage
 
@@ -35,7 +36,7 @@ class ClientFlow(Flow):
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-class MainMenuStage(Stage, core.QuestObject):
+class GameState(Stage, core.QuestObject):
     """
     """
 
@@ -51,43 +52,10 @@ class MainMenuStage(Stage, core.QuestObject):
             Data passed from the exit of the previous :class:`Stage`.
         """
 
-    def exit(self, data: dict = None) -> object:
-        """
-        Override this with teardwn code for exit from this stage, and
-        pass on data for the next stage.
-
-        data
-            Data that was passed to :class:`Flow.transition`.
-
-        :returns:
-            Arbitrary data for the next active :class:`Stage`.
-        """
-
-#----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-
-class GameplayStage(Stage, core.QuestObject):
-    """
-    """
-
-    def __init__(self, *args, **kwargs):
-        Stage.__init__(self, *args, **kwargs)
-        core.QuestObject.__init__(self)
-
-    def enter(self, data: dict = None) -> None:
-        """
-        Override this with setup code for entry of this stage.
-
-        data
-            Data passed from the exit of the previous :class:`Stage`.
-        """
-
-        # TEMP
-        from quest.characters import player
-        s = player.PlayerCharacter('characters/playerCharacter.ini')
-        s.setup()
-        s.root.reparent_to(runtime.render)
-        s.set_local(True)
-        runtime.camera_mgr.camera_follow_target = s.root
+        # Start our repository instance
+        client_agent_address = runtime.application.get_startup_variable('CA_HOST', '127.0.0.1')
+        client_agent_port = int(runtime.application.get_startup_variable('CA_PORT', '6667'))
+        runtime.cr.connect(client_agent_address, client_agent_port)
 
     def exit(self, data: dict = None) -> object:
         """
@@ -100,6 +68,8 @@ class GameplayStage(Stage, core.QuestObject):
         :returns:
             Arbitrary data for the next active :class:`Stage`.
         """
+
+        runtime.cr.disconnect()
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -127,9 +97,8 @@ class ClientFlowManager(configurable.Configurable, singleton.Singleton, core.Que
         """
 
         stages = dict(
-            splash=splash.Panda3dEngineSplash(exit_stage='gameplay'),
-            #main_menu=MainMenuStage(),
-            gameplay=GameplayStage(),
+            splash=splash.Panda3dEngineSplash(exit_stage='game'),
+            game=GameState(),
             quit=prefab.Quit())
 
         flow = ClientFlow(stages=stages)

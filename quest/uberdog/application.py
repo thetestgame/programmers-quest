@@ -2,7 +2,7 @@ from sqlite3 import connect
 from quest.engine import core, prc, showbase
 from quest.engine import runtime, vfs
 from quest.framework import application
-from quest.distributed import astron, constants
+from quest.distributed import repository, constants
 
 import argparse
 
@@ -28,17 +28,12 @@ class QuestUberDOGApplication(application.QuestApplication):
         """
 
         # Establish our repository connection
-        self.base.air = astron.AstronInternalRepository(
-            baseChannel=constants.NetworkChannels.UBERDOG_CHANNEL, 
-            serverId=constants.NetworkChannels.STATE_SERVER_CHANNEL,
-            dcFileNames=['config/quest.dc'],
-            dcSuffix="UD",
-            connectMethod=astron.AstronInternalRepository.CM_NET)
-        self.base.air.connect("127.0.0.1", 7199)
-        self.districtId = self.base.air.GameGlobalsId = constants.NetworkChannels.UBERDOG_CHANNEL
-
-        # Create our global object instances
-        self.login_manager = self.base.air.generateGlobalObject(constants.NetworkGlobalObjectIds.DOG_LOGIN_MANAGER, 'LoginManager')
+        state_server_channel = int(self.get_startup_variable("STATE_SERVER_CHANNEL", constants.NetworkChannels.STATE_SERVER_DEFAULT_CHANNEL))
+        self.air = repository.QuestInternalRepository.instantiate_singleton(
+            baseChannel=constants.NetworkChannels.UBERDOG_DEFAULT_CHANNEL, 
+            serverId=state_server_channel,
+            dcSuffix="UD")
+        self.air.connect("127.0.0.1", 7199)
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -47,14 +42,7 @@ def main(*args, **kwargs) -> int:
     Main entry point into the Programmer's Quest MMO UberDOG server application
     """ 
 
-    parser = argparse.ArgumentParser(description="Programmer's Quest UberDOG server")
-    #parser.add_argument('-p', '--port', type=int, default=9099, help='Port to listen for incoming connections against')
-
-    #parsed_args = parser.parse_args()
-    #startup_prc = 'server-port %d\n' % parsed_args.port
-
     kwargs['headless'] = True
-    #kwargs['startup_prc'] = startup_prc
     kwargs['application_cls'] = QuestUberDOGApplication
 
     return application.main(*args, **kwargs)

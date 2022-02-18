@@ -5,12 +5,13 @@ daemon:
 general:
     eventlogger: 127.0.0.1:9090
     dc_files:
+        - ../quest/configfiles/direct.dc
         - ../quest/configfiles/quest.dc
 
 # Actually just DOGs, not *the* UberDOG.
 uberdogs:
   - id: 1000
-    class: LoginManager
+    class: QuestLoginManager
     anonymous: true # May be contacted by status New clients to be Established
 
 messagedirector:

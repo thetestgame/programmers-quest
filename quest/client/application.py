@@ -3,13 +3,14 @@ from panda3d import core as p3d
 from quest.engine import core, prc, showbase
 from quest.engine import runtime, vfs
 from quest.framework import application, utilities
-from quest.client import flow, network, settings, camera
-from quest.world import world
+from quest.distributed import repository
+from quest.client import flow, settings, camera
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 class ClientApplication(application.QuestApplication):
     """
+    Primary QuestApplication instance for the Programmer's Quest! MMO client
     """
 
     def __init__(self, *args, **kwargs):
@@ -17,6 +18,7 @@ class ClientApplication(application.QuestApplication):
 
     def setup_framework(self) -> None:
         """
+        Performs framework setup operations on the client application
         """
         
         super().setup_framework()
@@ -29,6 +31,7 @@ class ClientApplication(application.QuestApplication):
 
     def setup_engine(self) -> None:
         """
+        Performs engine setup operations on the client application
         """
         
         super().setup_engine()
@@ -40,21 +43,23 @@ class ClientApplication(application.QuestApplication):
 
     def setup_game(self) -> None:
         """
+        Performs game setup operations on the client application
         """
         
         super().setup_game()
-        
+    
+        # Instantiate our singletons
         flow.ClientFlowManager.instantiate_singleton('config/flowManager.ini')
         camera.CameraManager.instantiate_singleton('config/cameraManager.ini')
-        network.QuestClientNetworkManager.instantiate_singleton()
         #world.WorldManager.instantiate_singleton('config/worldManager.ini')
+        repository.QuestClientRepository.instantiate_singleton()
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 def main(*args, **kwargs) -> int:
     """
     Main entry point into the Questlike MMO client application
-    """ 
+    """
 
     return application.main(ClientApplication, *args, **kwargs)
 

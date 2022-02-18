@@ -4,11 +4,68 @@ typedef uint32 zoneId;
 typedef uint64 channel;
 
 // The Python Views for these distributed classes.
-from quest.distributed.authentication import LoginManager/AI/UD
+from quest.distributed.objects import QuestDistributedObjectGlobal/AI/UD
+from quest.distributed.objects import QuestDistributedObject/AI/UD/UV
+from quest.distributed.objects import QuestDistributedNode/AI
+from quest.distributed.authentication import QuestLoginManager/AI/UD
+from quest.distributed.shard import DistributedShardServer/AI/UD
 
-// A simple DOG for username/password authentication and handoff to
-// the DistributedMaproot for avatar creation.
-dclass LoginManager {
-  set_maproot(doId maproot);
-  login(string username, string password) clsend;
+// Custom quest module wrapper for the Panda3D direct tree
+// DistributedObject class.
+//
+// See Also:
+//    "quest/distributed.objects.py"
+//      - QuestDistributedObject
+//      - QuestDistributedObjectAI
+//      - QuestDistributedObjectUD
+//      - QuestDistributedObjectOV
+dclass QuestDistributedObject : DistributedObject {
+};
+
+// Custom quest module wrapper for the Panda3D direct tree
+// DistributedObjectGlobal class.
+//
+// See Also:
+//    "quest/distributed.objects.py"
+//      - QuestDistributedObjectGlobal
+//      - QuestDistributedObjectGlobalAI
+//      - QuestDistributedObjectGlobalUD
+dclass QuestDistributedObjectGlobal : DistributedObjectGlobal {
+};
+
+// Custom quest module wrapper for the Panda3D direct tree
+// DistributedNode class.
+//
+// See Also:
+//    "quest/distributed.objects.py"
+//      - QuestDistributedNode
+//      - QuestDistributedNodeAI
+dclass QuestDistributedNode : DistributedNode {
+};
+
+// Cluster's authentication DOG instance. Handles the authentication and 
+// access control of incoming client connections into the Programmer's Quest
+// Astron cluster.
+// 
+// See Also:
+//    "quest/distributed/authentication.py"
+//      - QuestLoginManager
+//      - QuestLoginManagerAI
+//      - QuestLoginManagerUD
+dclass QuestLoginManager : QuestDistributedObjectGlobal  {
+  request_authentication(string token) clsend;
+  handle_request_authentication_result(string username, string password) clsend;
+};
+
+// Root discovery object for all AI server instances. Replicated across 
+// Client, AI, and UberDOG servers
+//
+// See Also:
+//    "quest/distributed/shard.py"
+//      - DistributedShardServer
+//      - DistributedShardServerAI
+//      - DistributedShardServerUD
+dclass DistributedShardServer: QuestDistributedObject {
+  set_name(string name="Undefined") required broadcast ram;
+  set_available(uint8 = 0) required broadcast ram;
 };
