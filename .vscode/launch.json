@@ -2,6 +2,13 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Start All Services (Windows)",
+            "type": "PowerShell",
+            "request": "launch",
+            "script": "./start-all.bat",
+            "cwd": "${workspaceFolder}/scripts/win32"
+        },
+        {
             "name":"Quest UberDOG (Dev)",
             "type":"python",
             "request":"launch",
