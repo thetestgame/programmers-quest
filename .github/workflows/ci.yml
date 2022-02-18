@@ -60,10 +60,12 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-
+  
+  # Syncs the repository README to DockerHub on a succesful build
   sync-readme-to-dockerhub:
     name: Sync README to DockerHub Repositories (${{ matrix.name }})
     runs-on: ubuntu-latest
+    needs: build-and-push-server-package
     permissions:
       contents: read
       packages: write
@@ -76,6 +78,9 @@ jobs:
           - name: "ai"
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+    
       - name: Sync Github README
         uses: ms-jpq/sync-dockerhub-readme@v1
         with:
