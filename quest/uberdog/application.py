@@ -2,7 +2,7 @@ from sqlite3 import connect
 from quest.engine import core, prc, showbase
 from quest.engine import runtime, vfs
 from quest.framework import application
-from quest.distributed import repository, constants
+from quest.distributed import astron, constants
 
 import argparse
 
@@ -28,12 +28,12 @@ class QuestUberDOGApplication(application.QuestApplication):
         """
 
         # Establish our repository connection
-        self.base.air = repository.AstronInternalRepository(
+        self.base.air = astron.AstronInternalRepository(
             baseChannel=constants.NetworkChannels.UBERDOG_CHANNEL, 
             serverId=constants.NetworkChannels.STATE_SERVER_CHANNEL,
             dcFileNames=['config/quest.dc'],
             dcSuffix="UD",
-            connectMethod=repository.AstronInternalRepository.CM_NET)
+            connectMethod=astron.AstronInternalRepository.CM_NET)
         self.base.air.connect("127.0.0.1", 7199)
         self.districtId = self.base.air.GameGlobalsId = constants.NetworkChannels.UBERDOG_CHANNEL
 

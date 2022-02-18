@@ -1,0 +1,19 @@
+# Ignore development folders
+.vscode/
+tools/
+tests/
+scripts/
+
+# Ignore development scripts
+conftest.py
+setup.py
+*.cfg
+*.init
+
+#Ignoring git and cache folders
+.git
+.cache
+
+# Ignoring all the markdown
+LICENSE
+*.md
