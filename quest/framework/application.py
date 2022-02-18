@@ -3,6 +3,7 @@ from quest.engine import core, prc, showbase
 from quest.engine import runtime, vfs, logging
 from quest.engine import http
 from quest.framework import localizer
+from quest.azure import playfab
 
 import os
 import ctypes
@@ -83,6 +84,7 @@ class QuestApplication(core.QuestObject):
         # Instantiate our engine singletons
         http.HttpManager.instantiate_singleton()
         localizer.ApplicationLocalizer.instantiate_singleton()
+        playfab.PlayFabManager.instantiate_singleton('config/playfabManager.ini')
 
     def setup_development(self) -> None:
         """
@@ -186,7 +188,7 @@ class QuestApplication(core.QuestObject):
 
         return d
 
-    def get_startup_variable(self, key: str, default: str) -> str:
+    def get_startup_variable(self, key: str, default: str = None) -> str:
         """
         Retrieves the startup variable passed either via command line or via
         the host environment variables
