@@ -1,0 +1,31 @@
+# Add 'devops' label to any change relating to the automatic tooling and commands used by the build systems
+devops:
+- .github/*
+- scripts/*
+- setup.py
+- setup.cfg
+- tools/*
+
+# Add 'test' label to any change to the repositories automatic testing
+test:
+- tests/*
+
+# Add 'source' label to any change to src files within the source dir EXCEPT for the docs or configfiles sub-folders
+source:
+- any: ['quest/**/*', '!quest/docs/*', '!quest/configfiles/*']
+
+# Add 'assets' label to any change in the assets directory
+assets:
+- 'assets/*'
+
+# Add 'uberdog' label to any UberDOG related source file changes
+uberdog:
+- 'quest/uberdog/*'
+
+# Add 'ai' label to any AI related source file changes
+ai:
+- 'quest/ai/*'
+
+# Add 'astron' label to any AI related source file changes
+astron:
+- 'astron/*'
