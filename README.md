@@ -1,5 +1,7 @@
-Programmer's Quest
-==================
+Programmer's Quest!
+===================
+
+Programmer's Quest! The open source Python 3 MMO showcasing the power of Panda3D, Distributed Objects, and the Astron server built by a industr professional. This project is still a work in progress.
 
 ### Dependencies
 
