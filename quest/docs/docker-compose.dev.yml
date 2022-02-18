@@ -1,0 +1,62 @@
+version: "3"
+services:
+  # Deploys our custom Astron instance. Astron handles the bulk of Client network interaction
+  # and game state management.
+  astron:
+    image: thetestgame/programmers-quest-astron:develop
+    networks:
+      - default
+      - programmers-quest
+    ports:
+      - "6667:6667/tcp" 
+    volumes:
+      - pq-astron-db:/server/databases
+      - pq-astron-logs/server/logs
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  # Deploys our UberDOG instance which handles global services for the entire
+  # Programmer's Quest deployment.
+  uberdog:
+    image: thetestgame/programmers-quest-uberdog:develop
+    networks:
+      - programmers-quest
+    environment:
+      - ASTRON_IP=astron:7199
+    links:
+      - "astron:astron"
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  ai-shard-hacker-valley:
+    image: thetestgame/programmers-quest-ai:develop
+    networks:
+      - programmers-quest
+    environment:
+      - ASTRON_IP=astron:7199
+      - SHARD_NAME=Hacker Valley
+    links:
+      - "astron:astron"
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+# Internal VLAN
+networks:
+  default:
+  programmers-quest:
+
+# Storage Volumes
+volumes:
+  pq-astron-db:
+    driver: local
+  pq-astron-logs:
+    driver: local
