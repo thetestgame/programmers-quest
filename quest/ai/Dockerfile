@@ -9,4 +9,4 @@ RUN pip install -r quest/docs/requirements.txt
 
 # Setup our entry point and command
 ENTRYPOINT ["python"]
-CMD ["-m", "quest.ai"]
+CMD ["-m", "quest.ai.service"]
