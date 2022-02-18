@@ -142,7 +142,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
   
-  # Syncs the repository README to DockerHub on a succesful release build
+  # Syncs the Docker README file to DockerHub on a succesful release build
   sync-readme-to-dockerhub:
     name: Sync README to DockerHub Repositories (${{ matrix.name }})
     runs-on: ubuntu-latest
@@ -169,4 +169,4 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: ${{ env.DOCKERHUB_OWNER }}/${{ env.IMAGE_PREFIX }}-${{ matrix.name }}
-          readme: "./README.md"
+          readme: "./quest/docs/docker-readme.md"
