@@ -29,6 +29,8 @@ class QuestNetworkRepository(singleton.Singleton):
     Base class for quest module network repositories
     """
 
+    GameGlobalsId = 10000
+
     def __init__(self):
         super().__init__()
 
@@ -58,6 +60,8 @@ class QuestClientRepository(astron.AstronClientRepository, QuestNetworkRepositor
     """
 
     def __init__(self, *args, **kwargs):
+        self.notify.setInfo(True)
+
         kwargs['dcFileNames'] = NetworkRepositoryConstants.NETWORK_DC_FILES
         kwargs['connectMethod'] = NetworkRepositoryConstants.NETWORK_METHOD
         super().__init__(*args, **kwargs)
@@ -190,7 +194,7 @@ class QuestInternalRepository(astron.AstronInternalRepository, QuestNetworkRepos
     Internal Astron repository instance for the Programmers Quest! AI and UberDOG server instances
     """
 
-    def __init__(self, base_channel, state_server_channel, db_server_channel, dcSuffix='AI'):
+    def __init__(self, base_channel: int, state_server_channel: int, db_server_channel: int, dcSuffix='AI'):
         self.notify.setInfo(True)
         threaded_net = prc.get_prc_bool('want-threaded-network', False)
         super().__init__(base_channel, state_server_channel, 
@@ -199,8 +203,6 @@ class QuestInternalRepository(astron.AstronInternalRepository, QuestNetworkRepos
 
         runtime.air = self
         runtime.base.air = self
-        self.districtId = self.GameGlobalsId = base_channel
-        self.district_id = self.districtId
         self.db_server_channel = db_server_channel
 
     def connect(self, astron_ip: str, astron_port: int) -> None:

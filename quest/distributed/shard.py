@@ -8,8 +8,8 @@ class DistributedShardServerBase(object):
     Base shared class for all shard server objects
     """
 
-    def __init__(self):
-        self.name = 'Undefined'
+    def __init__(self, name = 'Undefined'):
+        self.name = name
         self.available = 0
 
     def _get_repository() -> object:
@@ -93,17 +93,19 @@ class DistributedShardServer(objects.QuestDistributedObject, DistributedShardSer
     neverDisable = 1 # Legacy magic value from Pandas original DO implementation
 
     def __init__(self, cr: object):
-        super().__init__(cr)
+        objects.QuestDistributedObject.__init__(self, cr)
+        DistributedShardServerBase.__init__(self)
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-class DistributedShardServerAI(objects.DistributedObjectAI, DistributedShardServerBase):
+class DistributedShardServerAI(objects.QuestDistributedObjectAI, DistributedShardServerBase):
     """
     AI side implementation of the distributed shard server object used to identify AI server instances
     """
 
     def __init__(self, air: object, name: str = "Undefined"):
-        super().__init__(air)
+        objects.QuestDistributedObjectAI.__init__(self, air)
+        DistributedShardServerBase.__init__(self, name)
         self.air = air
         self.air.active_shard = self
         
@@ -120,7 +122,7 @@ class DistributedShardServerAI(objects.DistributedObjectAI, DistributedShardServ
         """
         """
 
-        self.send_update("setAvailable", [available])
+        self.send_update("set_available", [available])
 
     def b_set_available(self, available: bool) -> None:
         """

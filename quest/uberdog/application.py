@@ -32,6 +32,8 @@ class QuestUberDOGApplication(application.QuestApplication):
             state_server_channel=state_server_channel,
             db_server_channel=db_server_channel,
             dcSuffix="UD")
+        self.air.districtId = constants.NetworkChannels.UBERDOG_DEFAULT_CHANNEL
+        self.air.shard_id = self.air.districtId
 
         astron_address = self.get_startup_variable('ASTRON_IP', '127.0.0.1').split(':')
         astron_ip = astron_address[0]

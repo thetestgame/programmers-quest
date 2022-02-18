@@ -5,8 +5,6 @@
 # used by development copies of the Programmers Quest MMORPG             #
 ##########################################################################
 
-# Network:
-
 # Due to a bug with Astron's DC parser implementation we need to manually
 # match the DC hash across client/server. This value should match that found
 # in the Astron configuration file
