@@ -7,9 +7,9 @@ uniform mat4 p3d_ModelViewProjectionMatrix;
 in vec4 p3d_Vertex;
 in vec2 p3d_MultiTexCoord0;
 
-in vec2 frct_tilePosition;
-in vec2 frct_tileCount;
-in float frct_tileSheet;
+in vec2 pq_tilePosition;
+in vec2 pq_tileCount;
+in float pq_tileSheet;
 
 // Output to fragment shader
 out vec2 texcoord;
@@ -21,7 +21,7 @@ void main() {
   gl_Position = p3d_ModelViewProjectionMatrix * p3d_Vertex;
 
   texcoord = p3d_MultiTexCoord0;
-  tilePosition = frct_tilePosition;
-  tileCount = frct_tileCount;
-  tileSheet = frct_tileSheet;
+  tilePosition = pq_tilePosition;
+  tileCount = pq_tileCount;
+  tileSheet = pq_tileSheet;
 }
