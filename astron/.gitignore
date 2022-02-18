@@ -4,5 +4,7 @@
 # Built Astron server instances
 *.dll
 *.lib
+*.exe
+
 astrond
-astrond.exe
+astrond-linux

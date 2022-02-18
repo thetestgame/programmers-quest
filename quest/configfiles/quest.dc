@@ -7,6 +7,7 @@ typedef uint64 channel;
 from quest.distributed.objects import QuestDistributedObjectGlobal/AI/UD
 from quest.distributed.objects import QuestDistributedObject/AI/UD/UV
 from quest.distributed.objects import QuestDistributedNode/AI
+from quest.distributed.authentication import QuestAccount/AI/UD
 from quest.distributed.authentication import QuestLoginManager/AI/UD
 from quest.distributed.shard import DistributedShardServer/AI/UD
 
@@ -41,6 +42,18 @@ dclass QuestDistributedObjectGlobal : DistributedObjectGlobal {
 //      - QuestDistributedNode
 //      - QuestDistributedNodeAI
 dclass QuestDistributedNode : DistributedNode {
+};
+
+// Stub object to fulfill the requirements of the DC system. This is used internally to bridge the PlayFab account details to the details stored
+// within the Astron cluster database.
+//
+// See Also:
+//    "quest/distributed/authentication.py"
+//      - QuestAccount
+//      - QuestAccountAI
+//      - QuestAccountUD
+dclass QuestAccount : QuestDistributedObject {
+    string playfab_account_id;
 };
 
 // Cluster's authentication DOG instance. Handles the authentication and 

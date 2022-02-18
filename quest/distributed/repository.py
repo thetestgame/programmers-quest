@@ -9,6 +9,9 @@ from quest.engine import prc, runtime
 from direct.distributed import MsgTypes
 from direct.distributed.PyDatagram import PyDatagram
 
+import traceback
+import sys
+
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------- #
 
 class NetworkRepositoryConstants(object):
@@ -137,9 +140,14 @@ class QuestClientRepository(astron.AstronClientRepository, QuestNetworkRepositor
         """
 
         self.handle_connection_established()
-        self.login_manager.initiate_authentication(
+        self.login_manager.configure_authentication_handlers(
             success=self.client_is_authenticated,
             failure=self.client_authentication_failure)
+
+        # Start the authentication process with our startup arguments
+        pq_startup_email = runtime.application.get_startup_variable('PQ_EMAIL')
+        pq_startup_password = runtime.application.get_startup_variable('PQ_PASSWORD')
+        self.login_manager.authenticate_with_email_password(pq_startup_email, pq_startup_password)
 
     def client_is_authenticated(self) -> None:
         """
@@ -182,15 +190,38 @@ class QuestInternalRepository(astron.AstronInternalRepository, QuestNetworkRepos
     Internal Astron repository instance for the Programmers Quest! AI and UberDOG server instances
     """
 
-    def __init__(self, baseChannel, serverId, dcSuffix='AI'):
+    def __init__(self, base_channel, state_server_channel, db_server_channel, dcSuffix='AI'):
+        self.notify.setInfo(True)
         threaded_net = prc.get_prc_bool('want-threaded-network', False)
-        super().__init__(baseChannel, serverId, 
+        super().__init__(base_channel, state_server_channel, 
             NetworkRepositoryConstants.NETWORK_DC_FILES, 
             dcSuffix, NetworkRepositoryConstants.NETWORK_METHOD, threaded_net)
 
         runtime.air = self
         runtime.base.air = self
-        self.districtId = self.GameGlobalsId = baseChannel
+        self.districtId = self.GameGlobalsId = base_channel
+        self.district_id = self.districtId
+        self.db_server_channel = db_server_channel
+
+    def connect(self, astron_ip: str, astron_port: int) -> None:
+        """
+        Connects the internal repository instance to Astron's Message Director instance
+        """
+
+        self.notify.info('Connecting to Astron MD at %s:%s' % (astron_ip, astron_port))
+        super().connect(astron_ip, astron_port)
+
+    def get_avatar_id_from_sender(self) -> int:
+        """
+        """
+        
+        return self.get_msg_sender() & 0xFFFFFFFF
+
+    def get_account_id_from_sender(self) -> int:
+        """
+        """
+
+        return (self.get_msg_sender() >> 32) & 0xFFFFFFFF
 
     def handleConnected(self) -> None:
         """
@@ -199,5 +230,12 @@ class QuestInternalRepository(astron.AstronInternalRepository, QuestNetworkRepos
 
         super().handleConnected()
         self.handle_connection_established()
+
+    def write_server_event(self, *args, **kwargs) -> None:
+        """
+        Custom snake case wrapper for the Astron writeServerEvent function
+        """
+
+        self.writeServerEvent(*args, **kwargs)
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------- #

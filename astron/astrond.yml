@@ -15,7 +15,7 @@ uberdogs:
     anonymous: true # May be contacted by status New clients to be Established
 
 messagedirector:
-    bind: 127.0.0.1:7199
+    bind: 127.0.0.1:7100
 
 roles:
     - type: clientagent
@@ -43,6 +43,15 @@ roles:
 
     - type: stateserver
       control: 402000
+
+    - type: database
+      control: 403000
+      generate:
+        min: 100000000
+        max: 399999999
+      backend:
+        type: yaml
+        directory: databases/astrondb
 
     - type: eventlogger
       bind: 127.0.0.1:9090 # REMEMBER: UDP

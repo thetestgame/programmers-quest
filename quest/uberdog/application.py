@@ -1,10 +1,5 @@
-from sqlite3 import connect
-from quest.engine import core, prc, showbase
-from quest.engine import runtime, vfs
 from quest.framework import application
 from quest.distributed import repository, constants
-
-import argparse
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -17,6 +12,7 @@ class QuestUberDOGApplication(application.QuestApplication):
 
     def setup_game(self) -> None:
         """
+        Performs game setup operations on the server application
         """
 
         super().setup_game()
@@ -29,11 +25,18 @@ class QuestUberDOGApplication(application.QuestApplication):
 
         # Establish our repository connection
         state_server_channel = int(self.get_startup_variable("STATE_SERVER_CHANNEL", constants.NetworkChannels.STATE_SERVER_DEFAULT_CHANNEL))
+        db_server_channel = int(self.get_startup_variable('DATABASE_SERVER_CHANNEL', constants.NetworkChannels.DATABASE_SERVER_DEFAULT_CHANNEL))
+
         self.air = repository.QuestInternalRepository.instantiate_singleton(
-            baseChannel=constants.NetworkChannels.UBERDOG_DEFAULT_CHANNEL, 
-            serverId=state_server_channel,
+            base_channel=constants.NetworkChannels.UBERDOG_DEFAULT_CHANNEL, 
+            state_server_channel=state_server_channel,
+            db_server_channel=db_server_channel,
             dcSuffix="UD")
-        self.air.connect("127.0.0.1", 7199)
+
+        astron_address = self.get_startup_variable('ASTRON_IP', '127.0.0.1').split(':')
+        astron_ip = astron_address[0]
+        astron_port = astron_address[1]
+        self.air.connect(astron_ip, astron_port)
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 

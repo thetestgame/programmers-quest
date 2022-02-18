@@ -28,6 +28,7 @@ class NetworkChannels(enum.IntEnum):
     UBERDOG_DEFAULT_CHANNEL         = 300000
     AI_DEFAULT_CHANNEL              = 300001
     STATE_SERVER_DEFAULT_CHANNEL    = 402000
+    DATABASE_SERVER_DEFAULT_CHANNEL = 403000
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
