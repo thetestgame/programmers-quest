@@ -54,7 +54,7 @@ dclass QuestDistributedNode : DistributedNode {
 //      - QuestLoginManagerUD
 dclass QuestLoginManager : QuestDistributedObjectGlobal  {
   request_authentication(string token) clsend;
-  handle_request_authentication_result(string username, string password) clsend;
+  handle_request_authentication_result(uint32 code, string message) clsend;
 };
 
 // Root discovery object for all AI server instances. Replicated across 

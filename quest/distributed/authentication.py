@@ -1,99 +1,144 @@
 from datetime import datetime
 import enum
+from unittest import result
+
+from pytest import fail
 
 from quest.distributed import objects
 from quest.engine import runtime
 
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+class AuthResultcode(enum.Enum):
+    """
+    """
+
+    ARC_SUCCESS = 200
+    ARC_INVALID_TOKEN = 100
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-class NetworkRejectCodes(enum.Enum):
+class QuestLoginManager(objects.QuestDistributedObjectGlobal):
     """
     """
 
-    #"122" is the magic number for login problems.
+    def __init__(self, cr):
+        super().__init__(cr)
+
+        self._auth_success_callback = None
+        self._auth_failure_callback = None
+
+    def initiate_authentication(self, success: object = None, failure: object = None) -> None:
+        """
+        Initiates the authentication request process with the UberDOG server instance
+        """
+
+        self._auth_success_callback = success
+        self._auth_failure_callback = failure
+        self.d_request_authentication('quest-dev') #TODO
+        
+    def d_request_authentication(self, token: str) -> None:
+        """
+        Sends an authentication request to the game server
+        """
+
+        self.send_update('request_authentication', [token])
+
+    def handle_request_authentication_result(self, code: int, message: str) -> None:
+        """
+        Handles the authentication results from the UberDOG server
+        """
+
+        if code != AuthResultcode.ARC_SUCCESS.value and self._auth_failure_callback != None:
+            self._auth_failure_callback(code, message)
+        elif self._auth_success_callback != None:
+            self._auth_success_callback()
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+class QuestLoginManagerAI(objects.QuestDistributedObjectGlobalAI):
+    """
+    """
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+class QuestLoginManagerUD(objects.QuestDistributedObjectGlobalUD):
+    """
+    """
+
+    # "122" is the magic number for login problems.
     # See https://github.com/Astron/Astron/blob/master/doc/protocol/10-client.md
-    NRC_INVALID_AUTH = 122
+    ASTRON_CA_INVALID_AUTH = 122
 
-#----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-
-class LoginManager(objects.QuestDistributedObjectGlobal):
-    """
-    """
-
-    def generateInit(self) -> None:
+    def request_authentication(self, token: str) -> None:
         """
         """
 
-        super().generateInit()
-        self.notify.info(datetime.now().strftime("%H:%M:%S")+" LoginManager.generateInit() for "+str(self.doId))
-
-    def login(self, username: str, password: str) -> None:
-        """
-        """
-
-        # FIXME: Use TLS so that these are encrypted!
-        self.notify.info(datetime.now().strftime("%H:%M:%S")+" LoginManager.login("+username+", <password>) in "+str(self.doId))
-        self.sendUpdate("login", [username, password])
-
-#----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-
-class LoginManagerAI(objects.QuestDistributedObjectGlobalAI):
-    """
-    """
-
-    def generate(self) -> None:
-        """
-        """
-
-        super().generate()
-        self.notify.info(datetime.now().strftime("%H:%M:%S")+" LoginManagerAI.generate() for "+str(self.doId))
-
-    def set_maproot(self, maproot_doId: int) -> None:
-        """
-        """
-
-        self.notify.info(datetime.now().strftime("%H:%M:%S")+" LoginManagerAI.set_maproot("+str(maproot_doId)+") in "+str(self.doId))
-        self.sendUpdate("set_maproot", [maproot_doId])
-
-#----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-
-class LoginManagerUD(objects.QuestDistributedObjectGlobalUD):
-    """
-    """
-
-    def generate(self) -> None:
-        """
-        """
-
-        super().generate()
-        self.notify.info(datetime.now().strftime("%H:%M:%S")+" LoginManagerUD.generate() for "+str(self.doId))
-
-    def set_maproot(self, maproot_doId: int) -> None:
-        """
-        Tells the LoginManagerUD what maproot to notify on login.
-        """
-
-        self.notify.info(datetime.now().strftime("%H:%M:%S")+" LoginManagerUD.set_maproot("+str(maproot_doId)+") in "+str(self.doId))
-        #self.maproot = DistributedMaprootUD(self.air)
-        #self.maproot.generateWithRequiredAndId(maproot_doId, 0, 1)
-
-    def login(self, username: str, password: str) -> None:
-        """
-        """
-
-        clientId = self.air.get_msg_sender()
-        self.notify.info(datetime.now().strftime("%H:%M:%S")+" LoginManagerUD.login("+username+", <password>)  in "+str(self.doId)+" for client "+str(clientId))
-        if (username == "guest") and (password == "guest"):
+        client_id = self.air.get_msg_sender()
+        if (token == "quest-dev"):
             # Authenticate a client
             # FIXME: "2" is the magic number for CLIENT_STATE_ESTABLISHED,
             # for which currently no mapping exists.
-            self.air.setClientState(clientId, 2)
-            self.notify.info("Login successful (user: %s)" % (username,))
-
+            self.air.setClientState(client_id, 2)
+            self.notify.info("Login successful (user: %s)" % (token,))
+            self.send_authentication_result(client_id, AuthResultcode.ARC_SUCCESS)
         else:
             # Disconnect for bad auth and log attempt
-            self.air.eject(clientId, NetworkRejectCodes.NRC_INVALID_AUTH, "Bad credentials")
-            self.notify.info("Ejecting client for bad credentials (user: %s)" % (username,))
+            self.air.eject(client_id, self.ASTRON_CA_INVALID_AUTH, "Bad credentials")
+            self.notify.info("Ejecting client for bad credentials (user: %s)" % (token,))
+
+    def send_authentication_result(self, channel_id: int, result_code: AuthResultcode, message: str = 'Ok') -> None:
+        """
+        Sends the authentication result to a client instance
+        """
+
+        self.sendUpdateToChannel(channel_id, 'handle_request_authentication_result', [result_code.value, message])
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+class LoginManagerOperation(object):
+    """
+    Base class for all LoginManager server operations
+    """
+
+    def __init__(self, login_manager: QuestLoginManagerUD, sender: object):
+        self._login_manager = login_manager
+        self._sender = sender
+        self._callback = None
+
+    @property
+    def login_manager(self) -> QuestLoginManagerUD:
+        """
+        Returns our login_manager variable instance as a property
+        """
+
+        return self._login_manager
+
+    @property
+    def sender(self) -> object:
+        """
+        Returns our sender variable instance as a property
+        """
+
+        return self._sender
+
+    @property
+    def callback(self) -> object:
+        """
+        Returns our callback variable instance as a property
+        """
+
+        return self._callback
+
+    def set_callback(self, callback: object) -> None:
+        """
+        Sets our callback variable instance
+        """
+
+        return self._callback
+
+    def _handle_done(self) -> None:
+        """
+        """
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#

@@ -21,6 +21,11 @@ roles:
     - type: clientagent
       bind: 0.0.0.0:6667
       version: "quest-dev"
+
+      # Due to a bug with Astron generating an invalid hash we manually force our hash to match the client
+      # until this bug can be properly addressed.
+      manual_dc_hash: 0xDEADBEEF
+
       client:
         type: libastron
 

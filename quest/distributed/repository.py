@@ -6,6 +6,9 @@ from quest.distributed import constants
 from quest.framework import singleton
 from quest.engine import prc, runtime
 
+from direct.distributed import MsgTypes
+from direct.distributed.PyDatagram import PyDatagram
+
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------- #
 
 class NetworkRepositoryConstants(object):
@@ -88,7 +91,27 @@ class QuestClientRepository(astron.AstronClientRepository, QuestNetworkRepositor
         Handles the connection established event once the repository connects to Astron's CA
         """
 
-        self.sendHello(constants.APPLICATION_VERSION)
+        self.send_hello()
+
+    def send_hello(self) -> None:
+        """
+        Sends our hello message to the Astron server cluster ClientAgent
+        """
+
+        client_dc_hash = self.get_dc_file().get_hash()
+        client_version = constants.APPLICATION_VERSION
+        
+        if prc.has_prc_key('manual-dc-hash'):
+            client_dc_hash = int(prc.get_prc_string('manual-dc-hash'), 16)
+
+        if runtime.dev:
+            client_version = 'quest-dev' # Development always runs as quest-dev
+
+        dg = PyDatagram()
+        dg.add_uint16(MsgTypes.CLIENT_HELLO)
+        dg.add_uint32(client_dc_hash)
+        dg.add_string(client_version)
+        self.send(dg)
 
     def connection_failure(self) -> None:
         """
@@ -123,6 +146,8 @@ class QuestClientRepository(astron.AstronClientRepository, QuestNetworkRepositor
         Handles the authentication success callback signaling we can now ready to enter the game world
         """
 
+        print('Authenticated!')
+
         # TEMP
         from quest.characters import player
         s = player.PlayerCharacter('characters/playerCharacter.ini')
@@ -135,6 +160,8 @@ class QuestClientRepository(astron.AstronClientRepository, QuestNetworkRepositor
         """
         Handles the authentication failure callback. Informs the user of the issue.
         """
+
+        self.notify.warning('Authentication failed (%s). Reason: %s' % (code, message))
 
     def avatar_leaves(self, do_id: int) -> None:
         """
