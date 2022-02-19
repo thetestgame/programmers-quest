@@ -96,6 +96,8 @@ class DistributedShardServer(objects.QuestDistributedObject, DistributedShardSer
         objects.QuestDistributedObject.__init__(self, cr)
         DistributedShardServerBase.__init__(self)
 
+        print('WOAH!')
+
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 class DistributedShardServerAI(objects.QuestDistributedObjectAI, DistributedShardServerBase):

@@ -16,7 +16,8 @@ class NetworkGlobalObjectIds(enum.IntEnum):
     match the ids present in the development and production Astron cluster configuration files.
     """
 
-    DOG_LOGIN_MANAGER = 1000
+    GLOBAL_GAME_ROOT  = 4000
+    DOG_LOGIN_MANAGER = 4100
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -27,8 +28,10 @@ class NetworkChannels(enum.IntEnum):
 
     UBERDOG_DEFAULT_CHANNEL         = 300000
     AI_DEFAULT_CHANNEL              = 300001
+    
     STATE_SERVER_DEFAULT_CHANNEL    = 402000
     DATABASE_SERVER_DEFAULT_CHANNEL = 403000
+    DB_STATE_SERVER_DEFAULT_CHANNEL = 404000
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -38,7 +41,8 @@ class NetworkZones(enum.IntEnum):
     the distributed object IDs
     """
 
-    QUEST_ZONE_ID_INVALID   = 0 # Represents an invalid zone id. (NONE)
-    QUEST_ZONE_ID_SHARDS    = 1 # Contains all the registered shard server instances
+    QUEST_ZONE_ID_INVALID       = 0 # Represents an invalid zone id. (NONE)
+    QUEST_ZONE_ID_SHARDS        = 1 # Contains all the registered shard server instances
+    QUEST_ZONE_ID_MANAGEMENT    = 2 #
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#

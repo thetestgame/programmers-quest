@@ -1,5 +1,6 @@
 from quest.framework import application
-from quest.distributed import repository, constants
+from quest.distributed import constants
+from quest.uberdog import repository
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -27,11 +28,9 @@ class QuestUberDOGApplication(application.QuestApplication):
         state_server_channel = int(self.get_startup_variable("STATE_SERVER_CHANNEL", constants.NetworkChannels.STATE_SERVER_DEFAULT_CHANNEL))
         db_server_channel = int(self.get_startup_variable('DATABASE_SERVER_CHANNEL', constants.NetworkChannels.DATABASE_SERVER_DEFAULT_CHANNEL))
 
-        self.air = repository.QuestInternalRepository.instantiate_singleton(
-            base_channel=constants.NetworkChannels.UBERDOG_DEFAULT_CHANNEL, 
+        self.air = repository.QuestUberDOGRepository.instantiate_singleton(
             state_server_channel=state_server_channel,
-            db_server_channel=db_server_channel,
-            dcSuffix="UD")
+            db_server_channel=db_server_channel,)
         self.air.districtId = constants.NetworkChannels.UBERDOG_DEFAULT_CHANNEL
         self.air.shard_id = self.air.districtId
 

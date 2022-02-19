@@ -5,6 +5,7 @@ from quest.engine import runtime, vfs
 from quest.framework import application, utilities
 from quest.distributed import repository
 from quest.client import flow, settings, camera
+from quest.gui import manager as gui_manager
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -53,6 +54,7 @@ class ClientApplication(application.QuestApplication):
         camera.CameraManager.instantiate_singleton('config/cameraManager.ini')
         #world.WorldManager.instantiate_singleton('config/worldManager.ini')
         repository.QuestClientRepository.instantiate_singleton()
+        gui_manager.QuestClientGuiManager.instantiate_singleton('config/guiManager.ini')
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 

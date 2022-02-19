@@ -7,6 +7,7 @@ typedef uint64 channel;
 from quest.distributed.objects import QuestDistributedObjectGlobal/AI/UD
 from quest.distributed.objects import QuestDistributedObject/AI/UD/UV
 from quest.distributed.objects import QuestDistributedNode/AI
+from quest.distributed.game import DistributedGame/AI
 from quest.distributed.authentication import QuestAccount/AI/UD
 from quest.distributed.authentication import QuestLoginManager/AI/UD
 from quest.distributed.shard import DistributedShardServer/AI/UD
@@ -42,6 +43,17 @@ dclass QuestDistributedObjectGlobal : DistributedObjectGlobal {
 //      - QuestDistributedNode
 //      - QuestDistributedNodeAI
 dclass QuestDistributedNode : DistributedNode {
+};
+
+// This object has no attributes or methods and is never actually created by the game client. However
+// it is required for the distributed objects system to work properly. It serves as the object tree root
+// for the entire game inside the Astron server. Everything owned by the game is parented under this object
+//
+// See Also:
+//    "quest/distributed.game.py"
+//      - DistributedGame
+//      - DistributedGameAI
+dclass DistributedGame : QuestDistributedObject {
 };
 
 // Stub object to fulfill the requirements of the DC system. This is used internally to bridge the PlayFab account details to the details stored

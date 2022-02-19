@@ -36,7 +36,7 @@ class ClientFlow(Flow):
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-class GameState(Stage, core.QuestObject):
+class ConnectingState(Stage, core.QuestObject):
     """
     """
 
@@ -69,7 +69,35 @@ class GameState(Stage, core.QuestObject):
             Arbitrary data for the next active :class:`Stage`.
         """
 
-        runtime.cr.disconnect()
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+class GameState(Stage, core.QuestObject):
+    """
+    """
+
+    def __init__(self, *args, **kwargs):
+        Stage.__init__(self, *args, **kwargs)
+        core.QuestObject.__init__(self)
+
+    def enter(self, data: dict = None) -> None:
+        """
+        Override this with setup code for entry of this stage.
+
+        data
+            Data passed from the exit of the previous :class:`Stage`.
+        """
+
+    def exit(self, data: dict = None) -> object:
+        """
+        Override this with teardwn code for exit from this stage, and
+        pass on data for the next stage.
+
+        data
+            Data that was passed to :class:`Flow.transition`.
+
+        :returns:
+            Arbitrary data for the next active :class:`Stage`.
+        """
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -92,12 +120,19 @@ class ClientFlowManager(configurable.Configurable, singleton.Singleton, core.Que
                 initial_stage = dev_initial_stage
         self._flow.transition(initial_stage)
 
+    def transition(self, *args, **kwargs) -> None:
+        """
+        """
+
+        self._flow.transition(*args, **kwargs)
+
     def _create_client_flow(self) -> ClientFlow:
         """
         """
 
         stages = dict(
-            splash=splash.Panda3dEngineSplash(exit_stage='game'),
+            splash=splash.Panda3dEngineSplash(exit_stage='connecting'),
+            connecting=ConnectingState(),
             game=GameState(),
             quit=prefab.Quit())
 

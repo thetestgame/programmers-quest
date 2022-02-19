@@ -2,7 +2,7 @@
 Programmer's Quest! authentication code for allowing clients access to the Astron cluster instance using the PlayFab BaaS system provided by Azure's Gaming Stack
 """
 
-from quest.distributed import objects
+from quest.distributed import objects, constants
 from quest.engine import runtime
 
 from playfab import PlayFabClientAPI, PlayFabServerAPI
@@ -421,8 +421,22 @@ class PlayFabLoginOperation(QuestLoginManagerOperation):
         datagram.addChannel(self.account_id << 32)  # account Id is in high 32 bits, 0 in low (no avatar).
         self.login_manager.air.send(datagram)
 
-        # Set our new client's connection state as established and send them our final authentication result
+        # Set our new client's connection state as established
         self.login_manager.air.setClientState(self.sender, 2)
-        self.send_authentication_result(result_code=QuestInternalAuthResults.QIAR_SUCCESS)
+
+        # Add client interest to our root game distributed object id zones
+        starting_zones = [0, constants.NetworkZones.QUEST_ZONE_ID_MANAGEMENT, constants.NetworkZones.QUEST_ZONE_ID_SHARDS]
+        self.login_manager.air.client_add_interest_multiple(
+            self.sender, 0, self.login_manager.air.getGameDoId(),
+            starting_zones, self._handle_interest_set_callback) # client, interest, parent, zones, callback
+
+    def _handle_interest_set_callback(self, client_id: int, interest_id: int) -> None:
+        """
+        """
+
+        #TODO: fix callbacks
+
+        # Send our final authentication result
+        self.send_authentication_result(result_code=QuestInternalAuthResults.QIAR_SUCCESS) 
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
