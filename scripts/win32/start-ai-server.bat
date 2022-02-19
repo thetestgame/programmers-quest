@@ -3,7 +3,7 @@ title PQ - AI
 
 rem Define some constants for our AI server:
 set MAX_CHANNELS=999999
-set STATE_SERVER_CHANNEL=4002
+set STATE_SERVER_CHANNEL=402000
 set ASTRON_IP=127.0.0.1:7100
 set EVENTLOGGER_IP=127.0.0.1:7198
 set SHARD_NAME=Hacker Valley

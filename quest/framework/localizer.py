@@ -9,6 +9,8 @@ from quest.engine import core
 from quest.engine.vfs import get_matching_files
 from quest.engine.prc import get_prc_string, get_prc_bool
 
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
 def utf_8_encoder(unicode_csv_data: object):
     """
     """
@@ -23,6 +25,10 @@ def unicode_csv_reader(unicode_csv_data: object, dialect: object = csv.excel, **
     csv_reader = csv.reader(unicode_csv_data, dialect=dialect, **kwargs)
     for row in csv_reader:
         yield [ cell for cell in row ]
+
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
 
 class ApplicationLocalizer(Singleton, core.QuestObject):
     """
@@ -294,3 +300,5 @@ class ApplicationLocalizer(Singleton, core.QuestObject):
 
         raise AttributeError('%s has no attribute "%s"' % (
             self.__class__.__name__, key))
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------------#

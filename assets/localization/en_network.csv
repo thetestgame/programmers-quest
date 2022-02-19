@@ -4,4 +4,4 @@
 4,NETWORK_ERROR_EJECT,An unexpected network error has occured and your connection has been lost. Error Code: %(error_code)s
 124,OUTDATED_CLIENT_VERSION_EJECT,Failed to connect to game server. You appear to be running an outdated game client. Please download the latest version and try again.
 125,OUTDATED_CLIENT_HASH_EJECT,Failed to connect to game server. You appear to be running an outdated game client. Please download the latest version and try again.
-1000,NO_SHARDS_AVAILABLE,Failed to connect to game server.\nThere are currently no server shards available.
+1000,NO_SHARDS_AVAILABLE,Failed to connect to game server.\n\nThere are currently no server shards available.

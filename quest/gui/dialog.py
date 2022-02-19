@@ -12,7 +12,7 @@ class PopupDialog(DirectDialog, core.QuestObject):
     """
     """
 
-    def __init__(self, message: str = None, title: str = None, parent: object = None, callback: object = None, **kw: dict):
+    def __init__(self, message: str = None, title: str = None, parent: object = None, callback: object = None, fade_screen: float = 0, **kw: dict):
 
         if parent == None:
             parent = runtime.base.aspect2d
@@ -32,15 +32,15 @@ class PopupDialog(DirectDialog, core.QuestObject):
             ('buttonValueList',     button_values,          DGG.INITOPT),
             ('topPad',              0.2,                    DGG.INITOPT),
             ('midPad',              0.10,                   DGG.INITOPT),
-            ('sidePad',             0.2,                    DGG.INITOPT),
+            ('sidePad',             0.1,                    DGG.INITOPT),
             ('button_pad',          (0,0),                  None),
             ('button_relief',       None,                   None),
             ('button_text_pos',     (0,-0.01),              None),
             ('text_align',          p3d.TextNode.ACenter,   None),
             ('text_font',           DGG.getDefaultFont(),   None),
-            ('text_wordwrap',       12,                     None),
-            ('text_scale',          0.07,                   None),
-            ('fadeScreen',          0.5,                    None),
+            ('text_wordwrap',       15,                     None),
+            ('text_scale',          0.05,                   None),
+            ('fadeScreen',          fade_screen,            None),
             ('image_color',         (1, 1, 1, 1),           None),
             ('bgBuffer',            0.025,                  None),
             ('relief',              None,                   None),

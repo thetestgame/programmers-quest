@@ -2,7 +2,7 @@ from distutils.log import error
 from email import message
 from panda3d import core as p3d
 from panda3d_astron import repository as astron
-from pytest import fail
+from pytest import fail, param
 
 from quest.distributed import constants
 from quest.framework import singleton, localizer
@@ -45,7 +45,7 @@ class QuestNetworkRepository(singleton.Singleton):
         Configures all our global network objects
         """
         
-        self.login_manager = self.generateGlobalObject(constants.NetworkGlobalObjectIds.DOG_LOGIN_MANAGER, 'QuestLoginManager')
+        self.login_manager = self.generateGlobalObject(constants.NetworkGlobalObjectIds.DOG_LOGIN_MANAGER.value, 'QuestLoginManager')
 
     def handle_connection_established(self) -> None:
         """
@@ -175,7 +175,7 @@ class QuestClientRepository(astron.AstronClientRepository, FSM.FSM, QuestNetwork
             message_code = 3
         
         error_message = localizer.ApplicationLocalizer.get_network(message_code) % { 'error_code': error_code, 'reason': reason}
-        runtime.gui_manager.show_popup_message(error_message, callback=self._handle_connection_failure_popup_callback)
+        #runtime.gui_manager.show_popup_message(error_message, callback=self._handle_connection_failure_popup_callback)
 
     def _handle_connection_failure_popup_callback(self, option: str) -> None:
         """
@@ -191,14 +191,13 @@ class QuestClientRepository(astron.AstronClientRepository, FSM.FSM, QuestNetwork
         self.notify.info('ClientAgent handshake complete')
         self.handle_connection_established()
         self.startHeartbeat()
-        self.request('Login') #TODO: replace with login screen
+        self.request('Login')
 
     def enterLogin(self) -> None:
         """
         Enters the login connection management FSM state. Attempts to authenticate with the Astron cluster instnace
         """
 
-        self.notify.info('Authenticating with UberDOG')
         self.login_manager.configure_authentication_handlers(
             success=self.client_is_authenticated,
             failure=self.client_authentication_failure)
@@ -213,7 +212,8 @@ class QuestClientRepository(astron.AstronClientRepository, FSM.FSM, QuestNetwork
         Handles the authentication success callback signaling we can now ready to enter the game world
         """
 
-        self._handle_shards_discovered_callback()
+        self.notify.info('Authentication with UberDOG complete.')
+        self.request('WaitForBaseInterest')
  
     def client_authentication_failure(self, code: int, message: str) -> None:
         """
@@ -222,10 +222,29 @@ class QuestClientRepository(astron.AstronClientRepository, FSM.FSM, QuestNetwork
 
         self.notify.warning('Authentication failed (%s). Reason: %s' % (code, message))
 
-    def _handle_shards_discovered_callback(self) -> None:
+    def enterWaitForBaseInterest(self) -> None:
         """
         """
 
+        self.notify.info('Waiting for server to assign base interest...')
+        self.accept_once('CLIENT_ADD_INTEREST_MULTIPLE', self._handle_base_interest_add_callback)
+
+    def _handle_base_interest_add_callback(self, context: int, interest_id: int, parent_id: int, zone_ids: list) -> None:
+        """
+        """
+
+        # Verify this is the interest handle callback we are looking for. If not accept again and wait
+        if not all(zone_id in constants.STARTING_NETWORK_ZONES for zone_id in zone_ids):
+            self.accept_once('CLIENT_ADD_INTEREST_MULTIPLE', self._handle_base_interest_add_callback)
+            return
+
+        self.accept_once(self.getAllInterestsCompleteEvent(), self._handle_base_interest_complete_callback) #TODO: properly filter to only the base interests
+
+    def _handle_base_interest_complete_callback(self) -> None:
+        """
+        """
+
+        # Check if we have any available shards
         if not self.has_available_shards():
             self.request('NoServers')
         else:
@@ -236,8 +255,8 @@ class QuestClientRepository(astron.AstronClientRepository, FSM.FSM, QuestNetwork
         """
 
         self.notify.warning('Failed to connect to game server. There are no shards available to connect to')
-        error_message = localizer.ApplicationLocalizer.get_network('NO_SHARDS_AVAILABLE')
-        runtime.gui_manager.show_popup_message(error_message, callback=self._handle_no_servers_popup_callback)
+        #error_message = localizer.ApplicationLocalizer.get_network('NO_SHARDS_AVAILABLE')
+        #runtime.gui_manager.show_popup_message(error_message, callback=self._handle_no_servers_popup_callback)
 
     def _handle_no_servers_popup_callback(self, option: str) -> None:
         """
@@ -249,7 +268,7 @@ class QuestClientRepository(astron.AstronClientRepository, FSM.FSM, QuestNetwork
         """
         """
 
-        print('WOW!')
+        
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------- #
 
@@ -258,13 +277,16 @@ class QuestInternalRepository(astron.AstronInternalRepository, QuestNetworkRepos
     Internal Astron repository instance for the Programmers Quest! AI and UberDOG server instances
     """
 
-    def __init__(self, base_channel: int, state_server_channel: int, db_server_channel: int, dcSuffix='AI'):
+    def __init__(self, base_channel: int, state_server_channel: int, db_server_channel: int, dc_suffix='AI'):
         self.notify.setInfo(True)
+        self.notify.info('Starting internal repository (Base: %d | State server: %d | Database: %d | Suffix: %s)' % 
+            (base_channel, state_server_channel, db_server_channel, dc_suffix))
+        
         threaded_net = prc.get_prc_bool('want-threaded-network', False)
         QuestNetworkRepository.__init__(self)
         astron.AstronInternalRepository.__init__(self, base_channel, 
             state_server_channel, NetworkRepositoryConstants.NETWORK_DC_FILES, 
-            dcSuffix, NetworkRepositoryConstants.NETWORK_METHOD, threaded_net)
+            dc_suffix, NetworkRepositoryConstants.NETWORK_METHOD, threaded_net)
 
         runtime.air = self
         runtime.base.air = self
@@ -297,13 +319,6 @@ class QuestInternalRepository(astron.AstronInternalRepository, QuestNetworkRepos
 
         super().handleConnected()
         self.handle_connection_established()
-
-    def write_server_event(self, *args, **kwargs) -> None:
-        """
-        Custom snake case wrapper for the Astron writeServerEvent function
-        """
-
-        self.writeServerEvent(*args, **kwargs)
 
     def writeServerEvent(self, logtype: str, *args, **kwargs) -> None:
         """

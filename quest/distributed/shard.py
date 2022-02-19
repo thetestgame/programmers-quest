@@ -12,7 +12,7 @@ class DistributedShardServerBase(object):
         self.name = name
         self.available = 0
 
-    def _get_repository() -> object:
+    def _get_repository(self) -> object:
         """
         Returns our repository instance
         """
@@ -29,8 +29,6 @@ class DistributedShardServerBase(object):
     def announceGenerate(self) -> None:
         """
         """
-
-        super().announceGenerate()
 
         repository = self._get_repository()
         repository.active_shard_map[self.doId] = self
@@ -96,7 +94,12 @@ class DistributedShardServer(objects.QuestDistributedObject, DistributedShardSer
         objects.QuestDistributedObject.__init__(self, cr)
         DistributedShardServerBase.__init__(self)
 
-        print('WOAH!')
+    def announceGenerate(self) -> None:
+        """
+        """
+
+        objects.QuestDistributedObject.announceGenerate(self)
+        DistributedShardServerBase.announceGenerate(self)
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -110,7 +113,14 @@ class DistributedShardServerAI(objects.QuestDistributedObjectAI, DistributedShar
         DistributedShardServerBase.__init__(self, name)
         self.air = air
         self.air.active_shard = self
-        
+
+    def announceGenerate(self) -> None:
+        """
+        """
+
+        objects.QuestDistributedObjectAI.announceGenerate(self)
+        DistributedShardServerBase.announceGenerate(self)
+
     def delete(self) -> None:
         """
         """

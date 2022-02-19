@@ -56,6 +56,7 @@ class QuestLoginManager(objects.QuestDistributedObjectGlobal):
 
     def __init__(self, cr):
         super().__init__(cr)
+        self.notify.setInfo(True)
 
         self._auth_success_callback = None
         self._auth_failure_callback = None
@@ -79,6 +80,7 @@ class QuestLoginManager(objects.QuestDistributedObjectGlobal):
             'CreateAccount': True
         }
 
+        self.notify.info('Authenticating with email and password')
         PlayFabClientAPI.LoginWithEmailAddress(request, callback=self.handle_playfab_auth_callback)
 
     def authenticate_with_custom_id(self, custom_id: str) -> None:
@@ -91,6 +93,7 @@ class QuestLoginManager(objects.QuestDistributedObjectGlobal):
             'CreateAccount': True
         }
 
+        self.notify.info('Authenticating with custom identification')
         PlayFabClientAPI.LoginWithCustomID(request, callback=self.handle_playfab_auth_callback)
 
     def handle_playfab_auth_callback(self, result: dict = None, error: dict = None) -> None:
@@ -105,8 +108,8 @@ class QuestLoginManager(objects.QuestDistributedObjectGlobal):
             code = error['errorCode']
             reason = error['errorMessage']
 
-            self.notify.error(error) # Log for later
             self.handle_request_authentication_result(code, reason)
+            return
 
         # Attempt to authenticate with the Astron cluster using our PlayFab session ticket
         session_token = result['SessionTicket']
@@ -117,6 +120,7 @@ class QuestLoginManager(objects.QuestDistributedObjectGlobal):
         Sends an authentication request to the game server
         """
 
+        self.notify.info('Attempting to retrieve validation from UberDOG')
         self.send_update('request_authentication', [token])
 
     def handle_request_authentication_result(self, code: int, message: str) -> None:
@@ -124,6 +128,7 @@ class QuestLoginManager(objects.QuestDistributedObjectGlobal):
         Handles the authentication results from the UberDOG server
         """
 
+        self.notify.info('Received authentication validation from UberDOG')
         if code != 200 and self._auth_failure_callback != None:
             self._auth_failure_callback(code, message)
         elif self._auth_success_callback != None:
@@ -424,19 +429,10 @@ class PlayFabLoginOperation(QuestLoginManagerOperation):
         # Set our new client's connection state as established
         self.login_manager.air.setClientState(self.sender, 2)
 
-        # Add client interest to our root game distributed object id zones
-        starting_zones = [0, constants.NetworkZones.QUEST_ZONE_ID_MANAGEMENT, constants.NetworkZones.QUEST_ZONE_ID_SHARDS]
-        self.login_manager.air.client_add_interest_multiple(
-            self.sender, 0, self.login_manager.air.getGameDoId(),
-            starting_zones, self._handle_interest_set_callback) # client, interest, parent, zones, callback
-
-    def _handle_interest_set_callback(self, client_id: int, interest_id: int) -> None:
-        """
-        """
-
-        #TODO: fix callbacks
-
         # Send our final authentication result
         self.send_authentication_result(result_code=QuestInternalAuthResults.QIAR_SUCCESS) 
+
+        # Add client interest to our root game distributed object id zones
+        self.login_manager.air.client_add_interest_multiple(self.sender, 0, self.login_manager.air.getGameDoId(), constants.STARTING_NETWORK_ZONES)
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#

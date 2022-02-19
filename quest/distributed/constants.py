@@ -45,4 +45,6 @@ class NetworkZones(enum.IntEnum):
     QUEST_ZONE_ID_SHARDS        = 1 # Contains all the registered shard server instances
     QUEST_ZONE_ID_MANAGEMENT    = 2 #
 
+STARTING_NETWORK_ZONES = [0, NetworkZones.QUEST_ZONE_ID_MANAGEMENT.value, NetworkZones.QUEST_ZONE_ID_SHARDS.value]
+
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#

@@ -14,7 +14,8 @@ class QuestShowBase(ShowBase):
     notify = logging.get_notify_category('showbase')
 
     def __init__(self, *args, **kwargs):
-        prc.load_prc_file_data('window-title Programmers Quest', 'locale-information') #TODO: pull from localizer
+        prc.load_prc_file_data("window-title Programmer's Quest", 'locale-information') #TODO: pull from localizer
+        prc.load_prc_file_data('icon-filename etc/icon.ico', 'window-icon')
 
         super().__init__(*args, **kwargs)
         self._headless = self.windowType == 'none'

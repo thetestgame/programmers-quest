@@ -1,11 +1,12 @@
 from panda3d import core as p3d
 
 from quest.engine import core, prc, showbase
-from quest.engine import runtime, vfs
+from quest.engine import runtime, vfs, audio
 from quest.framework import application, utilities
 from quest.distributed import repository
-from quest.client import flow, settings, camera
-from quest.gui import manager as gui_manager
+from quest.client import settings, camera
+from quest.gui import flow, manager as gui_manager
+from quest.audio import music
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -50,11 +51,12 @@ class ClientApplication(application.QuestApplication):
         super().setup_game()
     
         # Instantiate our singletons
-        flow.ClientFlowManager.instantiate_singleton('config/flowManager.ini')
+        audio.SoundManager.instantiate_singleton()
+        gui_manager.QuestClientGuiManager.instantiate_singleton('config/guiManager.ini')
         camera.CameraManager.instantiate_singleton('config/cameraManager.ini')
+        music.ClientMusicManager.instantiate_singleton('config/musicManager.ini')
         #world.WorldManager.instantiate_singleton('config/worldManager.ini')
         repository.QuestClientRepository.instantiate_singleton()
-        gui_manager.QuestClientGuiManager.instantiate_singleton('config/guiManager.ini')
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 

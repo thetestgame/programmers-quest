@@ -26,7 +26,7 @@ class QuestAIRepository(repository.QuestInternalRepository):
         # Generate our shard server instance
         self.notify.info('Creating Shard Server instance (%s)' % self.shard_id)
         self.shard_instance = shard.DistributedShardServerAI(self, self.shard_name)
-        self.shard_instance.generateWithRequiredAndId(self.shard_id, self.getGameDoId(), 0) # self.getGameDoId(), constants.NetworkZones.QUEST_ZONE_ID_SHARDS.value
+        self.shard_instance.generateWithRequiredAndId(self.shard_id, self.getGameDoId(), constants.NetworkZones.QUEST_ZONE_ID_SHARDS.value)
         self.shard_instance.setAI(self.ourChannel)
 
         # Generate our global objects

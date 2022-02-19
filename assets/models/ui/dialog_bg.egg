@@ -1,27 +1,28 @@
 <Comment> {
-  "egg-texture-cards -magf nearest -minf nearest textures/ui/dialog_bg.png -o '.\models\ui\dialog_bg.egg'"
+  "egg-texture-cards -magf nearest -minf nearest textures/ui/dialog_bg.png -o '.\models\ui\dialog_bg.egg' -wm clamp -p 128,80"
 }
 <Texture> dialog_bg {
   "textures/ui/dialog_bg.png"
+  <Scalar> wrap { clamp }
   <Scalar> minfilter { nearest }
   <Scalar> magfilter { nearest }
 }
 <Group> {
   <VertexPool> vpool {
     <Vertex> 0 {
-      -0.5 0.5 0
+      -0.69921875 0.5875 0
       <UV> { 0 1 }
     }
     <Vertex> 1 {
-      -0.5 -0.5 0
+      -0.69921875 -0.5875 0
       <UV> { 0 0 }
     }
     <Vertex> 2 {
-      0.5 -0.5 0
+      0.69921875 -0.5875 0
       <UV> { 1 0 }
     }
     <Vertex> 3 {
-      0.5 0.5 0
+      0.69921875 0.5875 0
       <UV> { 1 1 }
     }
   }

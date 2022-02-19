@@ -19,9 +19,9 @@ class QuestUberDOGRepository(repository.QuestInternalRepository):
         super().handle_connection_established()
 
         # Create our distributed root game object
-        self.notify.info('Generateing root game object (%d)...' % self.getGameDoId())
+        self.notify.info('Generating root game object (%d)...' % self.getGameDoId())
         self.root_game_obj = game.DistributedGameAI(self)
-        self.root_game_obj.generateWithRequiredAndId(self.getGameDoId(), 0, 1)
+        self.root_game_obj.generateWithRequiredAndId(self.getGameDoId(), 0, 0)
 
         self.generate_global_objects()
         self.notify.info('UberDOG server ready.')
