@@ -10,6 +10,7 @@
 {# Define our Notify log levels to control log/console spam               #}
 notify-level-pnmimage error
 notify-level-prc error
+notify-timestamp 1
 
 {# Define Window/Graphics options for the application                    #}
 gl-display gl

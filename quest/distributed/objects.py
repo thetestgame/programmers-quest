@@ -14,7 +14,7 @@ from direct.distributed.DistributedNodeAI import DistributedNodeAI
 
 from quest.engine import core
 from quest.framework import singleton
-import datetime
+from datetime import datetime
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------- #
 
@@ -22,6 +22,9 @@ class QuestDistributedObjectMixin(core.QuestObject):
     """
     Mixin object for implementing share quest module based DO features
     """
+
+    def __init__(self, notify: str = None):
+        super().__init__(notify)
 
     def send_update(self, field: str, params: list) -> None:
         """
@@ -38,31 +41,68 @@ class QuestDistributedObjectGlobalMixin(singleton.Singleton, QuestDistributedObj
     """
     """
 
+    def __init__(self):
+        singleton.Singleton.__init__(self)
+        QuestDistributedObjectMixin.__init__(self)
+
     def generate(self) -> None:
         """
         Custom generate instance for handling automatic logging
         """
 
-        super().generate()
-
-        generate_time = datetime.now().strftime("%H:%M:%S")
         do_name = type(self).__name__
-        self.notify.info("%s %.generate for %s" % (generate_time, do_name, self.doId))
+        self.notify.info("%s generated under DoId %s" % (do_name, self.doId))
 
 class QuestDistributedObjectGlobal(DistributedObjectGlobal, singleton.Singleton, QuestDistributedObjectMixin):
     """
     Custom quest module wrapper for the Panda3D direct tree DistributedObjectGlobal class.
     """
 
+    def __init__(self, cr: object):
+        DistributedObjectGlobal.__init__(self, cr)
+        QuestDistributedObjectGlobalMixin.__init__(self)
+
+    def generate(self) -> None:
+        """
+        Custom generate instance for handling automatic logging
+        """
+
+        DistributedObjectGlobal.generate(self)
+        QuestDistributedObjectGlobalMixin.generate(self)
+
 class QuestDistributedObjectGlobalAI(DistributedObjectGlobalAI, singleton.Singleton, QuestDistributedObjectMixin):
     """
     Custom quest module wrapper for the Panda3D direct tree DistributedObjectGlobalAI class.
     """
 
+    def __init__(self, air: object):
+        DistributedObjectGlobalAI.__init__(self, air)
+        QuestDistributedObjectGlobalMixin.__init__(self)
+
+    def generate(self) -> None:
+        """
+        Custom generate instance for handling automatic logging
+        """
+
+        DistributedObjectGlobalAI.generate(self)
+        QuestDistributedObjectGlobalMixin.generate(self)
+
 class QuestDistributedObjectGlobalUD(DistributedObjectGlobalUD, singleton.Singleton, QuestDistributedObjectMixin):
     """
     Custom quest module wrapper for the Panda3D direct tree DistributedObjectGlobalUD class.
     """
+
+    def __init__(self, air: object):
+        DistributedObjectGlobalUD.__init__(self, air)
+        QuestDistributedObjectGlobalMixin.__init__(self)
+
+    def generate(self) -> None:
+        """
+        Custom generate instance for handling automatic logging
+        """
+
+        DistributedObjectGlobalUD.generate(self)
+        QuestDistributedObjectGlobalMixin.generate(self)
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------- #
 # Distributed Objects

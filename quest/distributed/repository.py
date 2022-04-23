@@ -6,7 +6,10 @@ from pytest import fail, param
 
 from quest.distributed import constants
 from quest.framework import singleton, localizer
-from quest.engine import prc, runtime, core
+from quest.engine import prc, runtime, core, logging
+from quest.gui import elements as gui_styles
+from quest.gui import flow
+from quest.login import screen as login_screen
 
 from direct.distributed import MsgTypes
 from direct.distributed.PyDatagram import PyDatagram
@@ -35,6 +38,8 @@ class QuestNetworkRepository(singleton.Singleton):
 
     def __init__(self):
         super().__init__()
+        self.notify = logging.get_notify_category(type(self).__name__)
+        self.notify.setInfo(True)
         self.GameGlobalsId = constants.NetworkGlobalObjectIds.GLOBAL_GAME_ROOT.value
 
         self.active_shard_map = {}
@@ -46,6 +51,8 @@ class QuestNetworkRepository(singleton.Singleton):
         """
         
         self.login_manager = self.generateGlobalObject(constants.NetworkGlobalObjectIds.DOG_LOGIN_MANAGER.value, 'QuestLoginManager')
+        self.event_manager = self.generateGlobalObject(constants.NetworkGlobalObjectIds.DOG_EVENT_MANAGER.value, 'QuestEventManager')
+        self.avatar_manager = self.generateGlobalObject(constants.NetworkGlobalObjectIds.DOG_AVATAR_MANAGER.value, 'QuestAvatarManager')
 
     def handle_connection_established(self) -> None:
         """
@@ -79,9 +86,9 @@ class QuestClientRepository(astron.AstronClientRepository, FSM.FSM, QuestNetwork
         kwargs['connectMethod'] = NetworkRepositoryConstants.NETWORK_METHOD
         kwargs['threadedNet'] = prc.get_prc_bool('want-threaded-network', False)
 
+        QuestNetworkRepository.__init__(self)
         astron.AstronClientRepository.__init__(self,*args, **kwargs)
         FSM.FSM.__init__(self, '%s-FSM' % self.__class__.__name__)
-        QuestNetworkRepository.__init__(self)
 
         runtime.cr = self
         runtime.base.cr = self
@@ -92,6 +99,8 @@ class QuestClientRepository(astron.AstronClientRepository, FSM.FSM, QuestNetwork
         self.accept("LOST_CONNECTION", self.lost_connection)
 
         self._server_shard_interest_handle = None
+        self._status_dialog = gui_styles.QuestDirectDialog(message='test')
+        self._showing_connection_failure = False
 
     def connect(self, host: str, port: int) -> None:
         """
@@ -99,6 +108,17 @@ class QuestClientRepository(astron.AstronClientRepository, FSM.FSM, QuestNetwork
         """
 
         self.request('Connect', host, port)
+
+    def _set_network_status_message(self, message: str = None, callback = None) -> None:
+        """
+        """
+
+        if message is None:
+            self._status_dialog.hide()
+        else:
+            self.notify.info('NetworkEvent: %s' % message)
+            self._status_dialog.set_message(message)
+            self._status_dialog.show()
 
     def enterConnect(self, host: str, port: int) -> None:
         """
@@ -137,7 +157,7 @@ class QuestClientRepository(astron.AstronClientRepository, FSM.FSM, QuestNetwork
         if runtime.dev:
             client_version = 'quest-dev' # Development always runs as quest-dev
 
-        self.notify.info('Attempting to handshake with ClientAgent instance')
+        self.notify.info('Attempting to handshake with server gateway')
         dg = PyDatagram()
         dg.add_uint16(MsgTypes.CLIENT_HELLO)
         dg.add_uint32(client_dc_hash)
@@ -149,33 +169,45 @@ class QuestClientRepository(astron.AstronClientRepository, FSM.FSM, QuestNetwork
         Called when the connection to the ClientAgent cannot be established
         """
 
-        self.request('ConnectionFailure', 1, 'Connection could not be established', self.connection_failure.__name__)
+        self.demand('ConnectionFailure', 1, 'Connection could not be established', self.connection_failure.__name__)
 
     def lost_connection(self) -> None:
         """
         Called when the connection to the ClientAgent is lost.
         """
 
-        self.request('ConnectionFailure', 2, 'Connection to the game server was lost', self.lost_connection.__name__)
+        if not self._showing_connection_failure:
+            self.demand('ConnectionFailure', 2, 'Connection to the game server was lost', self.lost_connection.__name__)
 
     def ejected(self, error_code: int, reason: str) -> None:
         """
         Called when the ClientAgent ejects us from the game network.
         """
 
-        self.request('ConnectionFailure', error_code, reason, self.ejected.__name__)
+        self.demand('ConnectionFailure', error_code, reason, self.ejected.__name__)
 
     def enterConnectionFailure(self, error_code: int, reason: str, failure_type: str) -> None:
         """
         """
 
+        if self._showing_connection_failure:
+            return
+        self._showing_connection_failure = True
+
         self.notify.warning('Connection to the game server has been closed (Type: %s | Code: %s | Reason: %s)' % (failure_type, error_code, reason))
-        message_code = error_code        
+        message_code = error_code
         if not localizer.ApplicationLocalizer.has_network(message_code):
             message_code = 3
         
         error_message = localizer.ApplicationLocalizer.get_network(message_code) % { 'error_code': error_code, 'reason': reason}
-        #runtime.gui_manager.show_popup_message(error_message, callback=self._handle_connection_failure_popup_callback)
+        self._set_network_status_message(error_message, callback=self._handle_connection_failure_popup_callback)
+        self.stopHeartbeat()
+
+    def exitConnectionFailure(self) -> None:
+        """
+        """
+
+        self._showing_connection_failure = False
 
     def _handle_connection_failure_popup_callback(self, option: str) -> None:
         """
@@ -198,11 +230,15 @@ class QuestClientRepository(astron.AstronClientRepository, FSM.FSM, QuestNetwork
         Enters the login connection management FSM state. Attempts to authenticate with the Astron cluster instnace
         """
 
+        done_event = 'client-login-screen-complete'
+        #self.login_screen = login_screen.ClientLoginScreen('config/screens/clientLoginScreen.ini', done_event)
+        #self.login_screen.setup()
+
         self.login_manager.configure_authentication_handlers(
             success=self.client_is_authenticated,
             failure=self.client_authentication_failure)
 
-        # Start the authentication process with our startup arguments
+        ## Start the authentication process with our startup arguments
         pq_startup_email = runtime.application.get_startup_variable('PQ_EMAIL')
         pq_startup_password = runtime.application.get_startup_variable('PQ_PASSWORD')
         self.login_manager.authenticate_with_email_password(pq_startup_email, pq_startup_password)
@@ -220,13 +256,13 @@ class QuestClientRepository(astron.AstronClientRepository, FSM.FSM, QuestNetwork
         Handles the authentication failure callback. Informs the user of the issue.
         """
 
-        self.notify.warning('Authentication failed (%s). Reason: %s' % (code, message))
+        self._set_network_status_message('Authentication failed (%s). Reason: %s' % (code, message))
 
     def enterWaitForBaseInterest(self) -> None:
         """
         """
 
-        self.notify.info('Waiting for server to assign base interest...')
+        self._set_network_status_message('Waiting for server to assign base interest...')
         self.accept_once('CLIENT_ADD_INTEREST_MULTIPLE', self._handle_base_interest_add_callback)
 
     def _handle_base_interest_add_callback(self, context: int, interest_id: int, parent_id: int, zone_ids: list) -> None:
@@ -245,6 +281,7 @@ class QuestClientRepository(astron.AstronClientRepository, FSM.FSM, QuestNetwork
         """
 
         # Check if we have any available shards
+        self._set_network_status_message('Base network interest assigned. Checking for server shards...')
         if not self.has_available_shards():
             self.request('NoServers')
         else:
@@ -268,7 +305,11 @@ class QuestClientRepository(astron.AstronClientRepository, FSM.FSM, QuestNetwork
         """
         """
 
-        
+        first_district = list(self.active_shard_map.values())[0]
+        self.notify.info('Connecting to shard: %s' % first_district.get_name())
+
+        self._set_network_status_message(None)
+        self.avatar_manager.retrieve_potential_characters()
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------- #
 
@@ -278,12 +319,11 @@ class QuestInternalRepository(astron.AstronInternalRepository, QuestNetworkRepos
     """
 
     def __init__(self, base_channel: int, state_server_channel: int, db_server_channel: int, dc_suffix='AI'):
-        self.notify.setInfo(True)
+        QuestNetworkRepository.__init__(self)
         self.notify.info('Starting internal repository (Base: %d | State server: %d | Database: %d | Suffix: %s)' % 
             (base_channel, state_server_channel, db_server_channel, dc_suffix))
         
         threaded_net = prc.get_prc_bool('want-threaded-network', False)
-        QuestNetworkRepository.__init__(self)
         astron.AstronInternalRepository.__init__(self, base_channel, 
             state_server_channel, NetworkRepositoryConstants.NETWORK_DC_FILES, 
             dc_suffix, NetworkRepositoryConstants.NETWORK_METHOD, threaded_net)
@@ -300,7 +340,7 @@ class QuestInternalRepository(astron.AstronInternalRepository, QuestNetworkRepos
         self.notify.info('Connecting to Astron MD at %s:%s' % (astron_ip, astron_port))
         super().connect(astron_ip, astron_port)
 
-    def get_avatar_id_from_sender(self) -> int:
+    def get_character_id_from_sender(self) -> int:
         """
         """
         
@@ -342,5 +382,23 @@ class QuestInternalRepository(astron.AstronInternalRepository, QuestNetworkRepos
         """
         Handles the results from the WriteTitleEvent api request
         """
+
+    def readerPollOnce(self) -> None:
+        """
+        Custom implementation of readerPollOnce to catch network errors and
+        handle problems safely on a per connection basis rather then bringing
+        the whole site down.
+        """
+
+        try:
+            super().readerPollOnce()
+        except (SystemExit, KeyboardInterrupt):
+            raise
+        except Exception as e:
+            self.eject(self.getMsgSender(), 4, '')
+            if runtime.dev:
+                print(traceback.format_exc())
+
+        return 1
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------- #

@@ -1,6 +1,7 @@
 from quest.framework import application
 from quest.distributed import repository, constants, shard
 from quest.engine import runtime
+from quest.world import manager
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -29,8 +30,9 @@ class QuestAIRepository(repository.QuestInternalRepository):
         self.shard_instance.generateWithRequiredAndId(self.shard_id, self.getGameDoId(), constants.NetworkZones.QUEST_ZONE_ID_SHARDS.value)
         self.shard_instance.setAI(self.ourChannel)
 
-        # Generate our global objects
+        # Generate our server objects
         self.generate_global_objects()
+        self.generate_world_objects()
 
         # Set our selves as ready
         self.shard_instance.b_set_available(True)
@@ -39,5 +41,15 @@ class QuestAIRepository(repository.QuestInternalRepository):
     def generate_global_objects(self) -> None:
         """
         """
+
+        self.notify.info('Generating server global objects')
+
+    def generate_world_objects(self) -> None:
+        """
+        """
+
+        self.notify.info('Generating server side world information')
+        self.world_manager = manager.WorldManagerAI(self, 'config/worldManager.ini')
+        self.world_manager.generate_server_worlds()
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#

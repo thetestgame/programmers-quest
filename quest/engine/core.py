@@ -9,10 +9,13 @@ class QuestObject(DirectObject):
     """
 
     def __init__(self, notify: str = None):
-        super().__init__()
+        DirectObject.__init__(self)
         
-        notify = notify if notify != None else self.get_notify_name()
+        notify = notify if notify != None else self._get_notify_name()
         self._notify = logging.get_notify_category(notify)
+
+        if self._is_server_object():
+            self._notify.setInfo(True)
 
     @property
     def notify(self) -> object:
@@ -22,24 +25,19 @@ class QuestObject(DirectObject):
 
         return self._notify
 
-    def get_notify_name(self) -> str:
+    def _get_notify_name(self) -> str:
         """
-        Returns this objects class name as a notify friendly name
+        Returns the object's notifier name
         """
 
-        name = self.__class__.__name__ 
-        res = [name[0].lower()] 
-        for c in name[1:]: 
-            if c in ('ABCDEFGHIJKLMNOPQRSTUVWXYZ'): 
-                res.append('-') 
-                res.append(c.lower()) 
-            else: 
-                res.append(c) 
+        return type(self).__name__
 
-        full =  ''.join(res) 
-        full = full.replace('t-m-x', 'tmx')
-        full = full.replace('h-t-t-p', 'http')
+    def _is_server_object(self) -> bool:
+        """
+        Returns true if this is a server object
+        """
 
-        return full
+        name = self._get_notify_name().lower()
+        return name.endswith('ai') or name.endswith('ud')
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#

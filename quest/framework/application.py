@@ -20,7 +20,7 @@ class QuestApplication(core.QuestObject):
     showbase_cls = showbase.QuestShowBase
 
     def __init__(self):
-        super().__init__(notify='application')
+        super().__init__()
 
         self._development = prc.get_prc_bool('want-dev', False)
         self._headless = prc.get_prc_string('window-type', 'onscreen') == 'none'
@@ -137,22 +137,25 @@ class QuestApplication(core.QuestObject):
         error_name = ex.__class__.__name__
         error_message = str(ex)
 
-        if runtime.has_localizer():
-            title = self.localizer.get_localization('gui.uncaught_error.title')
-            message = self.localizer.get_localization(
-                'gui.uncaught_error.message', 
-                error_name=error_name,
-                error_message=error_message)
-        else:
-            title = 'Critical Error'
-            message = '%s: %s' % (
-                error_name, error_message)
+        # If we are not operating as a headless application show our error message
+        # as a visual operation system popup box to the user
+        if not self._headless:
+            if runtime.has_localizer():
+                title = self.localizer.get_localization('gui.uncaught_error.title')
+                message = self.localizer.get_localization(
+                    'gui.uncaught_error.message', 
+                    error_name=error_name,
+                    error_message=error_message)
+            else:
+                title = 'Critical Error'
+                message = '%s: %s' % (
+                    error_name, error_message)
 
-        # Display our message to the user
-        if os.name == 'nt':
-            ctypes.windll.user32.MessageBoxW(0, message, title, 0)
-        else:
-            easygui.msgbox(message, title=title)
+            # Display our message to the user
+            if os.name == 'nt':
+                ctypes.windll.user32.MessageBoxW(0, message, title, 0)
+            else:
+                easygui.msgbox(message, title=title)
 
     def start(self) -> int:
         """
@@ -203,10 +206,25 @@ class QuestApplication(core.QuestObject):
 
         return return_value
 
+    def get_repository(self) -> object:
+        """
+        Returns our repository instance
+        """
+
+        repository = None
+        if runtime.has_cr():
+            repository = runtime.cr
+        elif runtime.has_air():
+            repository = runtime.air
+
+        assert repository != None, 'No repository found on runtime'
+        return repository
+
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 def main(application_cls: object = None, development: bool = False, headless: bool = False, startup_prc: str = '') -> int:
     """
+    Main entry point into the Programmer's Quest MMO application
     """ 
 
     if development: startup_prc += 'want-dev #t\n'

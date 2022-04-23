@@ -12,25 +12,11 @@ class DistributedShardServerBase(object):
         self.name = name
         self.available = 0
 
-    def _get_repository(self) -> object:
-        """
-        Returns our repository instance
-        """
-
-        repository = None
-        if runtime.has_cr():
-            repository = runtime.cr
-        elif runtime.has_air():
-            repository = runtime.air
-
-        assert repository != None, 'No repository found on runtime'
-        return repository
-
     def announceGenerate(self) -> None:
         """
         """
 
-        repository = self._get_repository()
+        repository = runtime.application.get_repository()
         repository.active_shard_map[self.doId] = self
         self.send_update_event()
 
@@ -42,7 +28,7 @@ class DistributedShardServerBase(object):
             if runtime.cr.active_shard is self:
                 runtime.cr.active_shard = None
         
-        repository = self._get_repository()
+        repository = runtime.application.get_repository()
         if self.doId in repository.active_shard_map:
             del repository.active_shard_map[self.doId]
 

@@ -18,6 +18,8 @@ class NetworkGlobalObjectIds(enum.IntEnum):
 
     GLOBAL_GAME_ROOT  = 4000
     DOG_LOGIN_MANAGER = 4100
+    DOG_EVENT_MANAGER = 4101
+    DOG_AVATAR_MANAGER = 4102
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 

@@ -14,6 +14,14 @@ uberdogs:
     class: QuestLoginManager
     anonymous: true # May be contacted by status New clients to be Established
 
+  - id: 4101
+    class: QuestEventManager
+    anonymous: false
+
+  - id: 4102
+    class: QuestAvatarManager
+    anonymous: false
+
 messagedirector:
     bind: 127.0.0.1:7100
 

@@ -5,7 +5,8 @@ from quest.engine import runtime, vfs, audio
 from quest.framework import application, utilities
 from quest.distributed import repository
 from quest.client import settings, camera
-from quest.gui import flow, manager as gui_manager
+from quest.gui import flow
+from quest.gui import manager as gui_manager
 from quest.audio import music
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
@@ -52,6 +53,7 @@ class ClientApplication(application.QuestApplication):
     
         # Instantiate our singletons
         audio.SoundManager.instantiate_singleton()
+        flow.ClientFlowManager.instantiate_singleton('config/flowManager.ini')
         gui_manager.QuestClientGuiManager.instantiate_singleton('config/guiManager.ini')
         camera.CameraManager.instantiate_singleton('config/cameraManager.ini')
         music.ClientMusicManager.instantiate_singleton('config/musicManager.ini')

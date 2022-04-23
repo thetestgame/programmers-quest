@@ -8,8 +8,10 @@ from quest.distributed.objects import QuestDistributedObjectGlobal/AI/UD
 from quest.distributed.objects import QuestDistributedObject/AI/UD/UV
 from quest.distributed.objects import QuestDistributedNode/AI
 from quest.distributed.game import DistributedGame/AI
-from quest.distributed.authentication import QuestAccount/AI/UD
-from quest.distributed.authentication import QuestLoginManager/AI/UD
+from quest.login.account import QuestAccount/AI/UD
+from quest.login.gateway import QuestLoginManager/AI/UD
+from quest.login.avatar import QuestAvatarManager/AI/UD
+from quest.azure.events import QuestEventManager/AI/UD
 from quest.distributed.shard import DistributedShardServer/AI/UD
 
 // Custom quest module wrapper for the Panda3D direct tree
@@ -77,9 +79,32 @@ dclass QuestAccount : QuestDistributedObject {
 //      - QuestLoginManager
 //      - QuestLoginManagerAI
 //      - QuestLoginManagerUD
-dclass QuestLoginManager : QuestDistributedObjectGlobal  {
+dclass QuestLoginManager : QuestDistributedObjectGlobal {
   request_authentication(string token) clsend;
-  handle_request_authentication_result(uint32 code, string message) clsend;
+  handle_request_authentication_result(uint32 code, string message);
+};
+
+// 
+// See Also:
+//    "quest/login/avatar.py"
+//      - QuestEventManager
+//      - QuestEventManagerAI
+//      - QuestEventManagerUD
+dclass QuestAvatarManager : QuestDistributedObjectGlobal {
+  choose_character(string character_id) clsend;
+  
+};
+
+// Cluster's analytics and event logging DOG instance. Handles the all analytics 
+// and event based events coming from either a client or AI instance. This
+// data is logged internally for analysis and reporting.
+// 
+// See Also:
+//    "quest/azure/events.py"
+//      - QuestAvatarManager
+//      - QuestAvatarManagerAI
+//      - QuestAvatarManagerUD
+dclass QuestEventManager : QuestDistributedObjectGlobal {
 };
 
 // Root discovery object for all AI server instances. Replicated across 
